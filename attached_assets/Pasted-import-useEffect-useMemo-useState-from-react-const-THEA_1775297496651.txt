@@ -1,0 +1,1131 @@
+import { useEffect, useMemo, useState } from "react";
+
+const THEATERS = {
+  iran: {
+    id: "iran",
+    short: "Iran",
+    codename: "MANTLE",
+    title: "IRAN REGIONAL WAR GRID",
+    region: "Middle East",
+    classification: "OPEN SOURCE // RAPID UPDATE",
+    sourceDiscipline: "Claims separated from confirmed strike effects",
+    overview:
+      "Tracks strategic strikes, retaliation risk, Hormuz disruption, regional militia activity, and spillover into Lebanon, Iraq, Syria, and Gulf infrastructure.",
+    friendly: {
+      label: "U.S. / Israel Alignment",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "N/A",
+      armoredLosses: "N/A",
+      casualties: "Mixed official / media reporting",
+      killed: "Mixed official / media reporting",
+    },
+    opposing: {
+      label: "Iran / Aligned Network",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "N/A",
+      armoredLosses: "N/A",
+      casualties: "Mixed official / media reporting",
+      killed: "Mixed official / media reporting",
+    },
+    indicators: [
+      "Hormuz access and maritime threat posture remain core escalation drivers.",
+      "Lebanon and militia-linked spillover risk remain elevated.",
+      "Critical infrastructure targeting would materially widen civilian and economic damage.",
+      "Narrative volatility is high; claims must be separated from confirmed strike effects.",
+    ],
+    sectors: [
+      { name: "Regional Escalation", value: 94 },
+      { name: "Maritime Disruption", value: 92 },
+      { name: "Infrastructure Risk", value: 88 },
+      { name: "Information Certainty", value: 52 },
+    ],
+    sources: [
+      "Official state statements",
+      "Major wire reporting",
+      "Regional strike reporting",
+      "Maritime disruption signals",
+    ],
+    statusLine:
+      "Active regional war environment with high narrative volatility and cross-front escalation risk.",
+  },
+  ukraine: {
+    id: "ukraine",
+    short: "Ukraine",
+    codename: "ANVIL",
+    title: "UKRAINE ATTRITION GRID",
+    region: "Europe",
+    classification: "OPEN SOURCE // COMPILED BATTLE LEDGER",
+    sourceDiscipline: "Equipment visuals stronger than casualty certainty",
+    overview:
+      "Tracks attrition, infrastructure stress, localized advances, equipment-loss comparisons, and evolving operational pressure across the Russia-Ukraine war.",
+    friendly: {
+      label: "Ukraine",
+      equipmentLosses: 11757,
+      tankLosses: 1405,
+      armoredLosses: 5709,
+      casualties: "500k–600k est.",
+      killed: "100k–140k est.",
+    },
+    opposing: {
+      label: "Russia",
+      equipmentLosses: 24383,
+      tankLosses: 4371,
+      armoredLosses: 13978,
+      casualties: "1.1m–1.4m est.",
+      killed: "230k–430k est.",
+    },
+    indicators: [
+      "Localized Russian advances remain key short-horizon indicators in eastern sectors.",
+      "Infrastructure stress remains strategically important after repeated strike waves.",
+      "Equipment-loss visuals favor Ukraine on relative attrition, but not all battlefield losses are visible.",
+      "Casualty figures remain estimate-driven and should be treated as ranges.",
+    ],
+    sectors: [
+      { name: "Equipment Attrition", value: 82 },
+      { name: "Infrastructure Stress", value: 91 },
+      { name: "Territorial Pressure", value: 68 },
+      { name: "Information Certainty", value: 54 },
+    ],
+    sources: [
+      "Visually confirmed equipment tracking",
+      "Compiled estimate reporting",
+      "Infrastructure attack reporting",
+    ],
+    statusLine:
+      "Attritional war with persistent infrastructure pressure and mixed-certainty casualty reporting.",
+  },
+  gaza: {
+    id: "gaza",
+    short: "Gaza",
+    codename: "EMBER",
+    title: "GAZA URBAN STRIKE GRID",
+    region: "Middle East",
+    classification: "OPEN SOURCE // FRAGMENTED REPORTING",
+    sourceDiscipline: "Urban conflict claims require hard-source review",
+    overview:
+      "Tracks strike density, humanitarian pressure, urban battlespace stress, hostage-linked developments, and claim-vs-confirmed separation.",
+    friendly: {
+      label: "Israel",
+      equipmentLosses: 421,
+      tankLosses: 37,
+      armoredLosses: 118,
+      casualties: "Classified / mixed reporting",
+      killed: "Mixed official release",
+    },
+    opposing: {
+      label: "Hamas / Allied Militants",
+      equipmentLosses: 1930,
+      tankLosses: 0,
+      armoredLosses: 0,
+      casualties: "Heavily disputed",
+      killed: "Heavily disputed",
+    },
+    indicators: [
+      "Humanitarian corridor pressure can alter tempo quickly.",
+      "Urban strike density and hostage-related developments remain escalation pivots.",
+      "Claim inflation risk is high; battle damage assessment needs hard-source review.",
+      "Civilian-impact tracking is central, not peripheral.",
+    ],
+    sectors: [
+      { name: "Strike Density", value: 89 },
+      { name: "Civilian Impact Risk", value: 95 },
+      { name: "Territorial Fluidity", value: 61 },
+      { name: "Information Certainty", value: 38 },
+    ],
+    sources: [
+      "Official military statements",
+      "Humanitarian reporting",
+      "Urban strike reporting",
+    ],
+    statusLine:
+      "Compressed urban conflict with severe civilian-impact sensitivity and fragmented information certainty.",
+  },
+  lebanon: {
+    id: "lebanon",
+    short: "Lebanon",
+    codename: "CEDAR",
+    title: "LEBANON NORTHERN FRONT",
+    region: "Middle East",
+    classification: "OPEN SOURCE // ACTIVE FRONT",
+    sourceDiscipline: "Cross-front linkage with Iran theater",
+    overview:
+      "Tracks Israel-Hezbollah escalation, Beirut strike activity, southern front movement, and displacement pressure as the northern front remains volatile.",
+    friendly: {
+      label: "Israel",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Official + media reporting",
+      killed: "Official + media reporting",
+    },
+    opposing: {
+      label: "Hezbollah / Aligned Units",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "N/A",
+      armoredLosses: "N/A",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    indicators: [
+      "Beirut strike patterns indicate widening operational willingness.",
+      "Southern-front buffer or security-zone logic could sustain escalation.",
+      "Civilian displacement remains strategically significant.",
+      "Iran war spillover directly affects this front.",
+    ],
+    sectors: [
+      { name: "Airstrike Pressure", value: 87 },
+      { name: "Border Instability", value: 90 },
+      { name: "Civilian Displacement", value: 84 },
+      { name: "Information Certainty", value: 58 },
+    ],
+    sources: [
+      "Frontline strike reporting",
+      "Border incident reporting",
+      "Displacement reporting",
+    ],
+    statusLine:
+      "Volatile northern front tightly linked to the broader Iran escalation environment.",
+  },
+  syria: {
+    id: "syria",
+    short: "Syria",
+    codename: "MOSAIC",
+    title: "SYRIA MULTI-ACTOR GRID",
+    region: "Middle East",
+    classification: "OPEN SOURCE // MULTI-ACTOR",
+    sourceDiscipline: "Attribution certainty often degraded",
+    overview:
+      "Tracks a fragmented multi-actor environment with regime, militia, foreign, and insurgent dimensions, plus spillover from the broader Iran-aligned confrontation space.",
+    friendly: {
+      label: "State / Partner Forces",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    opposing: {
+      label: "Militia / Insurgent / Rival Forces",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    indicators: [
+      "Regional strike spillover can alter the Syria picture quickly.",
+      "Militia-linked movement remains a key signal layer.",
+      "Actor count makes clean attribution difficult.",
+      "Backend actor-tagging would materially improve this theater.",
+    ],
+    sectors: [
+      { name: "Actor Fragmentation", value: 93 },
+      { name: "Strike Spillover", value: 79 },
+      { name: "Territorial Complexity", value: 86 },
+      { name: "Information Certainty", value: 43 },
+    ],
+    sources: [
+      "Regional strike reporting",
+      "Militia activity reporting",
+      "Multi-actor incident logs",
+    ],
+    statusLine:
+      "Fragmented battlespace where attribution, control, and spillover must be monitored together.",
+  },
+  yemen: {
+    id: "yemen",
+    short: "Yemen",
+    codename: "CHOKEPOINT",
+    title: "RED SEA / YEMEN MARITIME GRID",
+    region: "Middle East",
+    classification: "OPEN SOURCE // MARITIME THREAT",
+    sourceDiscipline: "System effects matter beyond direct casualty counts",
+    overview:
+      "Tracks Red Sea disruption, Yemen-based strike risk, maritime chokepoint pressure, and broader regional effects on trade and military posture.",
+    friendly: {
+      label: "U.S. / Partner Maritime Posture",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "N/A",
+      armoredLosses: "N/A",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    opposing: {
+      label: "Houthi-Aligned Forces",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "N/A",
+      armoredLosses: "N/A",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    indicators: [
+      "Shipping disruption can create outsized global-system effects.",
+      "Red Sea operations should be read alongside the Iran card.",
+      "Maritime insurance and route diversion are relevant operational indicators.",
+      "Strike tempo is not the only metric; chokepoint control matters.",
+    ],
+    sectors: [
+      { name: "Shipping Risk", value: 91 },
+      { name: "Strike Threat", value: 74 },
+      { name: "Regional Linkage", value: 89 },
+      { name: "Information Certainty", value: 57 },
+    ],
+    sources: [
+      "Shipping incident reporting",
+      "Strike reporting",
+      "Route diversion signals",
+    ],
+    statusLine:
+      "Maritime theater where chokepoint pressure and system disruption are first-order indicators.",
+  },
+  sudan: {
+    id: "sudan",
+    short: "Sudan",
+    codename: "FRACTURE",
+    title: "SUDAN COLLAPSE GRID",
+    region: "Africa",
+    classification: "OPEN SOURCE // HUMANITARIAN CRISIS",
+    sourceDiscipline: "Civilian exposure often clearer than force tallies",
+    overview:
+      "Tracks one of the world’s most severe active wars: urban fighting, territorial fragmentation, civilian displacement, and collapse-level humanitarian stress.",
+    friendly: {
+      label: "SAF / Aligned Elements",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    opposing: {
+      label: "RSF / Allied Elements",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    indicators: [
+      "Humanitarian and battlefield deterioration are tightly linked.",
+      "Territorial control can shift with limited warning.",
+      "Civilian exposure is a first-order signal here.",
+      "This theater deserves a dedicated humanitarian-stress layer.",
+    ],
+    sectors: [
+      { name: "State Breakdown", value: 96 },
+      { name: "Civilian Exposure", value: 97 },
+      { name: "Territorial Fragmentation", value: 88 },
+      { name: "Information Certainty", value: 47 },
+    ],
+    sources: [
+      "Humanitarian reporting",
+      "Urban combat reporting",
+      "Displacement reporting",
+    ],
+    statusLine:
+      "Collapse-pressure conflict where humanitarian stress and territorial fragmentation move together.",
+  },
+  myanmar: {
+    id: "myanmar",
+    short: "Myanmar",
+    codename: "DELTA",
+    title: "MYANMAR MULTI-FRONT GRID",
+    region: "Asia",
+    classification: "OPEN SOURCE // TERRITORIAL CONTEST",
+    sourceDiscipline: "Sub-theaters matter more than headline summary",
+    overview:
+      "Tracks insurgent expansion, junta operations, airpower usage, and fluctuating territorial control across a multi-front conflict system.",
+    friendly: {
+      label: "Junta-Aligned Forces",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    opposing: {
+      label: "Resistance / Ethnic Armed Groups",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    indicators: [
+      "Territorial control should be tracked as a layered map problem.",
+      "Airstrikes and reprisals remain important indicators.",
+      "Actor diversity makes simple two-side framing weak.",
+      "Backend sub-theater filtering would improve usability.",
+    ],
+    sectors: [
+      { name: "Insurgent Momentum", value: 84 },
+      { name: "Airpower Pressure", value: 73 },
+      { name: "Territorial Complexity", value: 92 },
+      { name: "Information Certainty", value: 45 },
+    ],
+    sources: [
+      "Territorial control reporting",
+      "Airstrike reporting",
+      "Sub-theater conflict updates",
+    ],
+    statusLine:
+      "Diffuse war where actor diversity and territorial layering drive the real picture.",
+  },
+  drc: {
+    id: "drc",
+    short: "Eastern DRC",
+    codename: "RIFT",
+    title: "EASTERN DRC REBEL GRID",
+    region: "Africa",
+    classification: "OPEN SOURCE // REGIONALIZED INSTABILITY",
+    sourceDiscipline: "Movement and displacement signals often outrank force counts",
+    overview:
+      "Tracks rebel pressure, displacement, regional spillover, and contested control in eastern Congo, where local conflict has wider regional consequences.",
+    friendly: {
+      label: "DRC / Partner Forces",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    opposing: {
+      label: "Rebel / Aligned Armed Groups",
+      equipmentLosses: "Mixed reporting",
+      tankLosses: "Mixed reporting",
+      armoredLosses: "Mixed reporting",
+      casualties: "Mixed reporting",
+      killed: "Mixed reporting",
+    },
+    indicators: [
+      "Displacement and territorial shifts should be read together.",
+      "Regional linkage makes this more than a purely local fight.",
+      "Infrastructure and route control are key indicators.",
+      "Backend regional overlays would improve this card.",
+    ],
+    sectors: [
+      { name: "Rebel Pressure", value: 83 },
+      { name: "Civilian Displacement", value: 90 },
+      { name: "Regional Spillover", value: 71 },
+      { name: "Information Certainty", value: 49 },
+    ],
+    sources: [
+      "Displacement reporting",
+      "Route-control signals",
+      "Regional security reporting",
+    ],
+    statusLine:
+      "Regionalized local war where movement corridors and civilian displacement are core signals.",
+  },
+  taiwan: {
+    id: "taiwan",
+    short: "Taiwan",
+    codename: "RING",
+    title: "TAIWAN CONTINGENCY GRID",
+    region: "Asia-Pacific",
+    classification: "OPEN SOURCE // WARNING MODEL",
+    sourceDiscipline: "Warning indicators outrank loss-ledger logic",
+    overview:
+      "Tracks sorties, exercises, naval presence, air-defense tempo, logistics posture, and escalation indicators rather than a conventional hot-war ledger.",
+    friendly: {
+      label: "Taiwan / Partners",
+      equipmentLosses: 0,
+      tankLosses: 0,
+      armoredLosses: 0,
+      casualties: "N/A",
+      killed: "N/A",
+    },
+    opposing: {
+      label: "PRC Forces",
+      equipmentLosses: 0,
+      tankLosses: 0,
+      armoredLosses: 0,
+      casualties: "N/A",
+      killed: "N/A",
+    },
+    indicators: [
+      "Sortie spikes, maritime encirclement patterns, and logistics staging matter more than casualty counts.",
+      "Political messaging and force-dispersal timing are key warning indicators.",
+      "Exercise tempo should be scored against baselines.",
+      "This theater should emphasize forward-risk modeling over damage reporting.",
+    ],
+    sectors: [
+      { name: "Mobilization Signal", value: 71 },
+      { name: "Naval Pressure", value: 77 },
+      { name: "Airspace Tempo", value: 74 },
+      { name: "Information Certainty", value: 66 },
+    ],
+    sources: [
+      "Exercise reporting",
+      "Military activity tracking",
+      "Regional signaling indicators",
+    ],
+    statusLine:
+      "Pre-contact warning theater driven by mobilization and signaling rather than losses.",
+  },
+};
+
+const THEATER_ORDER = [
+  "iran",
+  "ukraine",
+  "gaza",
+  "lebanon",
+  "syria",
+  "yemen",
+  "sudan",
+  "myanmar",
+  "drc",
+  "taiwan",
+];
+
+function formatNumber(value) {
+  return typeof value === "number" ? value.toLocaleString() : value;
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function buildReportText(theater, runtime) {
+  return [
+    "CENTRAL INTELLIGENCE-STYLE BATTLEFIELD STATUS REPORT",
+    "",
+    `PRODUCT: WARSTATE / ${theater.codename}`,
+    `THEATER: ${theater.title}`,
+    `DISPLAY NAME: ${theater.short}`,
+    `REGION: ${theater.region}`,
+    `CLASSIFICATION: ${theater.classification}`,
+    `POSTURE: ${runtime.posture}`,
+    `CONFIDENCE: ${runtime.confidence}`,
+    `LAST REFRESH: ${runtime.lastUpdated}`,
+    `SOURCE DISCIPLINE: ${theater.sourceDiscipline}`,
+    "",
+    "CURRENT STATUS",
+    runtime.currentStatus,
+    "",
+    "EXECUTIVE OVERVIEW",
+    theater.overview,
+    "",
+    "FORCE LEDGER",
+    `${theater.friendly.label} | Total equipment losses: ${formatNumber(theater.friendly.equipmentLosses)}`,
+    `${theater.opposing.label} | Total equipment losses: ${formatNumber(theater.opposing.equipmentLosses)}`,
+    `${theater.friendly.label} | Tank losses: ${formatNumber(theater.friendly.tankLosses)}`,
+    `${theater.opposing.label} | Tank losses: ${formatNumber(theater.opposing.tankLosses)}`,
+    `${theater.friendly.label} | Armored losses: ${formatNumber(theater.friendly.armoredLosses)}`,
+    `${theater.opposing.label} | Armored losses: ${formatNumber(theater.opposing.armoredLosses)}`,
+    "",
+    "PRIORITY INDICATORS",
+    ...theater.indicators.map((item, idx) => `${idx + 1}. ${item}`),
+    "",
+    "SOURCE STACK",
+    ...theater.sources.map((item, idx) => `${idx + 1}. ${item}`),
+  ].join("\n");
+}
+
+function downloadFile(filename, content, type = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (error) {
+    // fall through to manual copy fallback
+  }
+
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "true");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    area.style.pointerEvents = "none";
+    document.body.appendChild(area);
+    area.focus();
+    area.select();
+    const ok = document.execCommand("copy");
+    area.remove();
+    return ok;
+  } catch (error) {
+    return false;
+  }
+}
+
+function openPrintWindow(title, reportText) {
+  const printWindow = window.open("", "_blank", "width=900,height=1100");
+  if (!printWindow) return false;
+  const escapedTitle = title.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const escapedBody = reportText
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br/>");
+  printWindow.document.write(`<!doctype html><html><head><title>${escapedTitle}</title><style>
+    body { background:#ffffff; color:#111111; font-family: Courier New, monospace; padding:32px; line-height:1.5; }
+    h1 { font-size:18px; margin:0 0 16px 0; }
+    .report { white-space:normal; font-size:12px; }
+    @media print { body { padding:18px; } }
+  </style></head><body><h1>${escapedTitle}</h1><div class="report">${escapedBody}</div></body></html>`);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 250);
+  return true;
+}
+
+function drawBars(doc, x, y, width, items) {
+  let currentY = y;
+  items.forEach((item) => {
+    doc.setFont("courier", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(220, 227, 232);
+    doc.text(item.name, x, currentY);
+    doc.setDrawColor(35, 45, 48);
+    doc.setFillColor(10, 17, 20);
+    doc.rect(x, currentY + 6, width, 10, "FD");
+    doc.setFillColor(52, 211, 153);
+    doc.rect(x, currentY + 6, Math.max(0, Math.min(width, (item.value / 100) * width)), 10, "F");
+    doc.setFont("courier", "normal");
+    doc.text(`${item.value}/100`, x + width + 8, currentY + 14);
+    currentY += 24;
+  });
+  return currentY;
+}
+
+export default function WARSTATEPreview() {
+  const [selectedTheaterId, setSelectedTheaterId] = useState("iran");
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [reportOpen, setReportOpen] = useState(false);
+  const [generatedReport, setGeneratedReport] = useState(null);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [toast, setToast] = useState("");
+  const [search, setSearch] = useState("");
+  const [expandedPanel, setExpandedPanel] = useState("overview");
+  const [manualCopyOpen, setManualCopyOpen] = useState(false);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(""), 2000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const filteredTheaters = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return THEATER_ORDER;
+    return THEATER_ORDER.filter((id) => {
+      const t = THEATERS[id];
+      return [t.short, t.title, t.region, t.codename, t.overview].join(" ").toLowerCase().includes(q);
+    });
+  }, [search]);
+
+  const theater = THEATERS[selectedTheaterId];
+
+  const runtime = useMemo(() => {
+    const drift = refreshCount % 3;
+    const sectors = theater.sectors.map((sector, index) => ({
+      ...sector,
+      value: clamp(sector.value + ((index + refreshCount) % 2 === 0 ? drift : -drift), 18, 99),
+    }));
+
+    const postureMap = {
+      iran: ["REGIONAL WAR", "ESCALATION WAVE", "CRITICAL CHOKEPOINT PRESSURE"],
+      ukraine: ["ATTRITION LOCK", "CONTESTED PRESSURE", "INFRASTRUCTURE STRAIN"],
+      gaza: ["URBAN STRIKE PRESSURE", "HIGH-HEAT URBAN GRID", "HUMANITARIAN CRITICAL"],
+      lebanon: ["BORDER ESCALATION", "NORTHERN FRONT PRESSURE", "DISPLACEMENT SURGE"],
+      syria: ["MULTI-ACTOR FRAGMENT", "REGIONAL SPILLOVER", "MILITIA GRIDLOCK"],
+      yemen: ["MARITIME THREAT", "SHIPPING DISRUPTION", "CHOKEPOINT PRESSURE"],
+      sudan: ["STATE COLLAPSE PRESSURE", "HUMANITARIAN BREAKDOWN", "MULTI-FRONT FRACTURE"],
+      myanmar: ["INSURGENCY EXPANSION", "MULTI-FRONT PRESSURE", "AIRPOWER SUPPRESSION"],
+      drc: ["REBEL PRESSURE", "REGIONALIZED INSTABILITY", "DISPLACEMENT SURGE"],
+      taiwan: ["PRE-CONTACT TENSION", "ESCALATION WATCH", "MOBILIZATION SIGNAL"],
+    };
+
+    const confidenceMap = {
+      iran: ["B / FAST-MOVING", "B- / FAST-MOVING", "C+ / CLAIM-HEAVY"],
+      ukraine: ["B / MIXED", "B- / MIXED", "B / VERIFIED-MIX"],
+      gaza: ["C / FRAGMENTED", "C- / FRAGMENTED", "C / MIXED-CLAIMS"],
+      lebanon: ["B- / ACTIVE", "C+ / ACTIVE", "B- / STRIKE-HEAVY"],
+      syria: ["C+ / MULTI-SOURCE", "C / FRAGMENTED", "C+ / ACTOR-HEAVY"],
+      yemen: ["B- / ACTIVE", "C+ / ACTIVE", "B- / MARITIME"],
+      sudan: ["B- / HUMANITARIAN CRISIS", "C+ / FRAGMENTED", "B- / MULTI-FRONT"],
+      myanmar: ["B- / MULTI-FRONT", "C+ / FRAGMENTED", "B- / TERRITORIAL"],
+      drc: ["B- / REGIONALIZED", "C+ / MIXED", "B- / DISPLACEMENT-LED"],
+      taiwan: ["B / INDICATOR-DRIVEN", "B+ / WATCH MODEL", "B / PRE-CONTACT"],
+    };
+
+    return {
+      posture: postureMap[selectedTheaterId][refreshCount % 3],
+      confidence: confidenceMap[selectedTheaterId][refreshCount % 3],
+      sectors,
+      lastUpdated: lastUpdated.toLocaleString(),
+      currentStatus: theater.statusLine,
+    };
+  }, [theater, selectedTheaterId, lastUpdated, refreshCount]);
+
+  const comparisonRows = [
+    ["Total Equipment Losses", formatNumber(theater.friendly.equipmentLosses), formatNumber(theater.opposing.equipmentLosses), "Battle Ledger"],
+    ["Tank Losses", formatNumber(theater.friendly.tankLosses), formatNumber(theater.opposing.tankLosses), "Armor Class"],
+    ["Armored Vehicle Losses", formatNumber(theater.friendly.armoredLosses), formatNumber(theater.opposing.armoredLosses), "Armor Class"],
+    ["Military Casualties", theater.friendly.casualties, theater.opposing.casualties, "Estimate / Mixed"],
+    ["Estimated Killed", theater.friendly.killed, theater.opposing.killed, "Estimate / Mixed"],
+  ];
+
+  const trendBars = [
+    {
+      label: "Equipment Attrition",
+      friendly:
+        typeof theater.friendly.equipmentLosses === "number" && typeof theater.opposing.equipmentLosses === "number" && theater.opposing.equipmentLosses > 0
+          ? Math.max(5, Math.round((theater.friendly.equipmentLosses / theater.opposing.equipmentLosses) * 100))
+          : 0,
+      opposing: typeof theater.opposing.equipmentLosses === "number" && theater.opposing.equipmentLosses > 0 ? 100 : 0,
+    },
+    {
+      label: "Tank Attrition",
+      friendly:
+        typeof theater.friendly.tankLosses === "number" && typeof theater.opposing.tankLosses === "number" && theater.opposing.tankLosses > 0
+          ? Math.max(5, Math.round((theater.friendly.tankLosses / theater.opposing.tankLosses) * 100))
+          : 0,
+      opposing: typeof theater.opposing.tankLosses === "number" && theater.opposing.tankLosses > 0 ? 100 : 0,
+    },
+    {
+      label: "Armored Attrition",
+      friendly:
+        typeof theater.friendly.armoredLosses === "number" && typeof theater.opposing.armoredLosses === "number" && theater.opposing.armoredLosses > 0
+          ? Math.max(5, Math.round((theater.friendly.armoredLosses / theater.opposing.armoredLosses) * 100))
+          : 0,
+      opposing: typeof theater.opposing.armoredLosses === "number" && theater.opposing.armoredLosses > 0 ? 100 : 0,
+    },
+  ];
+
+  const reportText = buildReportText(theater, runtime);
+
+  const activeReport = generatedReport ?? {
+    theater,
+    runtime,
+    comparisonRows,
+    trendBars,
+    reportText,
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setLastUpdated(new Date());
+    setRefreshCount((count) => count + 1);
+    setRefreshing(false);
+    setToast("Status refreshed");
+  };
+
+  const handleGenerateReport = () => {
+    setGeneratedReport({
+      theater,
+      runtime,
+      comparisonRows,
+      trendBars,
+      reportText,
+    });
+    setReportOpen(true);
+    setToast("Report generated");
+  };
+
+  const handleExportPDF = async () => {
+    setExportingPdf(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const source = activeReport;
+      const doc = new jsPDF({ unit: "pt", format: "letter" });
+      doc.setFillColor(5, 8, 10);
+      doc.rect(0, 0, 612, 792, "F");
+      doc.setDrawColor(52, 211, 153);
+      doc.setLineWidth(1);
+      doc.rect(26, 26, 560, 740);
+      doc.setTextColor(220, 227, 232);
+      doc.setFont("courier", "bold");
+      doc.setFontSize(18);
+      doc.text("WARSTATE // FIELD STATUS REPORT", 42, 52);
+      doc.setFontSize(10);
+      doc.text(`${source.theater.title} // ${source.runtime.lastUpdated}`, 42, 70);
+      doc.setFont("courier", "normal");
+      const lines = doc.splitTextToSize(source.reportText, 508);
+      doc.text(lines, 42, 94);
+      const endY = drawBars(doc, 42, 520, 210, source.runtime.sectors);
+      if (endY < 730) {
+        drawBars(
+          doc,
+          320,
+          520,
+          180,
+          source.trendBars.map((bar) => ({ name: bar.label, value: bar.friendly }))
+        );
+      }
+      doc.save(`warstate-${source.theater.id}-report.pdf`);
+      setToast("PDF exported");
+    } catch (error) {
+      const opened = openPrintWindow(`${activeReport.theater.title} PDF Fallback`, activeReport.reportText);
+      setToast(opened ? "PDF fallback opened" : "PDF export failed");
+      console.error(error);
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
+  const handleExportTXT = () => {
+    downloadFile(`warstate-${activeReport.theater.id}.txt`, activeReport.reportText);
+    setToast("TXT exported");
+  };
+
+  const handleExportJSON = () => {
+    const source = activeReport;
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      theater: source.theater.title,
+      codename: source.theater.codename,
+      posture: source.runtime.posture,
+      confidence: source.runtime.confidence,
+      currentStatus: source.runtime.currentStatus,
+      data: source.theater,
+    };
+    downloadFile(`warstate-${source.theater.id}.json`, JSON.stringify(payload, null, 2), "application/json;charset=utf-8");
+    setToast("JSON exported");
+  };
+
+  const handleCopyBrief = async () => {
+    const copied = await copyToClipboard(activeReport.reportText);
+    if (copied) {
+      setToast("Brief copied");
+      setManualCopyOpen(false);
+    } else {
+      setManualCopyOpen(true);
+      setToast("Clipboard blocked");
+    }
+  };
+
+  const handlePrint = () => {
+    const opened = openPrintWindow(`${activeReport.theater.title} // Print`, activeReport.reportText);
+    setToast(opened ? "Print opened" : "Print blocked");
+  };
+
+  const panelButton = (id, label) => (
+    <button
+      onClick={() => setExpandedPanel(id)}
+      className={`px-3 py-2 border text-[10px] uppercase tracking-[0.2em] ${
+        expandedPanel === id
+          ? "border-emerald-300 bg-emerald-300/10 text-emerald-200"
+          : "border-white/10 bg-[#050709] text-[#9ba6ae] hover:border-emerald-400/30 hover:text-[#d7dde2]"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#020405] text-[#d9dfe3] p-3 md:p-6 font-mono">
+      <div className="max-w-[1700px] mx-auto space-y-3">
+        {toast && (
+          <div className="border border-emerald-300/30 bg-[#071012] px-4 py-3 text-xs uppercase tracking-[0.22em] text-emerald-200">
+            {toast}
+          </div>
+        )}
+
+        <div className="border border-emerald-400/20 bg-[#05080a] shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
+          <div className="border-b border-emerald-400/15 px-4 md:px-6 py-4 space-y-4">
+            <div className="grid grid-cols-1 xl:grid-cols-[1.25fr_0.95fr] gap-4 items-end">
+              <div className="space-y-2 min-w-0">
+                <div className="text-[11px] tracking-[0.34em] uppercase text-emerald-300/65">
+                  RSR WHITE WING // WARSTATE // OPERATIONAL STATUS SYSTEM
+                </div>
+                <h1 className="text-4xl md:text-6xl font-semibold leading-none tracking-tight">WARSTATE</h1>
+                <div className="text-sm text-[#8f9aa3] uppercase tracking-[0.18em]">
+                  Battlefield status monitor and report generator
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-emerald-400/15 border border-emerald-400/15 min-w-0">
+                <div className="bg-[#06090b] px-4 py-3"><div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Theater</div><div className="mt-2 text-sm truncate">{theater.short}</div></div>
+                <div className="bg-[#06090b] px-4 py-3"><div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Codename</div><div className="mt-2 text-sm text-emerald-300 truncate">{theater.codename}</div></div>
+                <div className="bg-[#06090b] px-4 py-3"><div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Posture</div><div className="mt-2 text-sm text-emerald-300 truncate">{runtime.posture}</div></div>
+                <div className="bg-[#06090b] px-4 py-3"><div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Last Refresh</div><div className="mt-2 text-sm truncate">{runtime.lastUpdated}</div></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_1fr] gap-4">
+              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-[10px] uppercase tracking-[0.26em] text-[#7a868f]">Conflict registry</div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-[#7a868f]">{filteredTheaters.length} visible</div>
+                </div>
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search theater, region, codename"
+                  className="w-full bg-[#050709] border border-white/10 px-3 py-3 text-sm outline-none placeholder:text-[#66727b]"
+                />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-5 gap-2">
+                  {filteredTheaters.map((id) => {
+                    const entry = THEATERS[id];
+                    const active = id === selectedTheaterId;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => setSelectedTheaterId(id)}
+                        title={`${entry.short} // ${entry.codename}`}
+                        className={`px-3 py-3 border text-xs text-left ${active ? "border-emerald-300 bg-emerald-300/10 text-emerald-200" : "border-white/10 bg-[#050709] text-[#9ba6ae] hover:border-emerald-400/30 hover:text-[#d7dde2]"}`}
+                      >
+                        <div className="uppercase tracking-[0.16em]">{entry.short}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] opacity-70">Code: {entry.codename}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-3">
+                <div className="text-[10px] uppercase tracking-[0.26em] text-[#7a868f]">Actions</div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <button disabled={refreshing} onClick={handleRefresh} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-60">{refreshing ? "Refreshing" : "Live Refresh"}</button>
+                  <button onClick={handleGenerateReport} className="px-3 py-3 border border-emerald-300 bg-emerald-300/10 text-xs uppercase tracking-[0.18em] text-emerald-200">Generate Report</button>
+                  <button disabled={exportingPdf} onClick={handleExportPDF} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-60">{exportingPdf ? "Exporting" : "Export PDF"}</button>
+                  <button onClick={handleExportTXT} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Export TXT</button>
+                  <button onClick={handleExportJSON} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Export JSON</button>
+                  <button onClick={handleCopyBrief} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Copy Brief</button>
+                  <button onClick={handlePrint} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Print Report</button>
+                  <button onClick={() => setSearch("")} className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Clear Search</button>
+                </div>
+                <div className="text-[11px] leading-6 text-[#95a1aa]">
+                  EdgeOne-safe pass applied: PDF export now lazy-loads jspdf at click time, all export actions use the active generated report snapshot, and button states are hardened.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 md:p-6 space-y-4">
+            <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-4">
+              <div className="border border-emerald-400/15 bg-[#06090b]">
+                <div className="border-b border-emerald-400/10 px-4 py-3 text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Current status</div>
+                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4">
+                    <div><div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Product</div><div className="mt-2 text-lg text-[#f2f5f7]">{theater.title}</div></div>
+                    <div><div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Classification</div><div className="mt-2 text-sm text-[#c0c9cf]">{theater.classification}</div></div>
+                    <div><div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Source discipline</div><div className="mt-2 text-sm leading-6 text-[#c0c9cf]">{theater.sourceDiscipline}</div></div>
+                  </div>
+                  <div className="space-y-4">
+                    <div><div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Status line</div><div className="mt-2 text-sm leading-6 text-[#c0c9cf]">{runtime.currentStatus}</div></div>
+                    <div className="grid grid-cols-2 gap-px bg-white/10">
+                      <div className="bg-[#050709] px-3 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Region</div><div className="mt-2 text-sm">{theater.region}</div></div>
+                      <div className="bg-[#050709] px-3 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Confidence</div><div className="mt-2 text-sm">{runtime.confidence}</div></div>
+                      <div className="bg-[#050709] px-3 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Refresh Count</div><div className="mt-2 text-sm">{refreshCount}</div></div>
+                      <div className="bg-[#050709] px-3 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Engine</div><div className="mt-2 text-sm">REPORT CORE</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border border-emerald-400/15 bg-[#06090b]">
+                <div className="border-b border-emerald-400/10 px-4 py-3 flex flex-wrap gap-2 items-center justify-between">
+                  <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Detail panels</div>
+                  <div className="flex flex-wrap gap-2">
+                    {panelButton("overview", "Overview")}
+                    {panelButton("ledger", "Ledger")}
+                    {panelButton("indicators", "Indicators")}
+                    {panelButton("stress", "Stress")}
+                    {panelButton("sources", "Sources")}
+                  </div>
+                </div>
+
+                <div className="p-4 min-h-[420px]">
+                  {expandedPanel === "overview" && (
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Executive overview</div>
+                        <p className="mt-3 text-sm leading-7 text-[#c7d0d6]">{theater.overview}</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {theater.indicators.slice(0, 3).map((item) => (
+                          <div key={item} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">{item}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {expandedPanel === "ledger" && (
+                    <div className="border border-white/10 overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#081014] text-[#93a0a9] uppercase tracking-[0.18em] text-[10px]">
+                          <tr>
+                            <th className="text-left px-3 py-3 font-medium">Metric</th>
+                            <th className="text-left px-3 py-3 font-medium">{theater.friendly.label}</th>
+                            <th className="text-left px-3 py-3 font-medium">{theater.opposing.label}</th>
+                            <th className="text-left px-3 py-3 font-medium">Type</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comparisonRows.map(([metric, friendly, opposing, note], idx) => (
+                            <tr key={metric} className={idx % 2 === 0 ? "bg-[#050709]" : "bg-[#070b0d]"}>
+                              <td className="px-3 py-3 text-[#dde3e7]">{metric}</td>
+                              <td className="px-3 py-3 text-[#bec8ce]">{friendly}</td>
+                              <td className="px-3 py-3 text-[#bec8ce]">{opposing}</td>
+                              <td className="px-3 py-3 text-[#7d8992] uppercase text-[10px] tracking-[0.18em]">{note}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {expandedPanel === "indicators" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {theater.indicators.map((item) => (
+                        <div key={item} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">{item}</div>
+                      ))}
+                    </div>
+                  )}
+
+                  {expandedPanel === "stress" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-4">
+                        {runtime.sectors.map((sector) => (
+                          <div key={sector.name}>
+                            <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]"><span>{sector.name}</span><span>{sector.value}</span></div>
+                            <div className="h-3 bg-[#0b1114] border border-white/5"><div className="h-full bg-emerald-300/85" style={{ width: `${sector.value}%` }} /></div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="space-y-4">
+                        {trendBars.map((bar) => (
+                          <div key={bar.label}>
+                            <div className="flex justify-between gap-4 text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]"><span>{bar.label}</span><span>{bar.friendly} / {bar.opposing}</span></div>
+                            <div className="space-y-1">
+                              <div className="h-3 bg-[#0b1114] border border-white/5"><div className="h-full bg-emerald-300/85" style={{ width: `${bar.friendly}%` }} /></div>
+                              <div className="h-3 bg-[#0b1114] border border-white/5"><div className="h-full bg-[#7e8a93]" style={{ width: `${bar.opposing}%` }} /></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {expandedPanel === "sources" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {theater.sources.map((source) => (
+                        <div key={source} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">{source}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {manualCopyOpen && (
+          <div className="fixed inset-0 z-[60] bg-black/82 p-4 md:p-8 flex items-center justify-center">
+            <div className="w-full max-w-4xl border border-emerald-400/20 bg-[#05080a] shadow-[0_20px_80px_rgba(0,0,0,0.7)] overflow-hidden">
+              <div className="flex items-center justify-between gap-4 border-b border-emerald-400/10 px-5 md:px-7 py-5">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.24em] text-emerald-300/65">Manual copy fallback</div>
+                  <h3 className="text-2xl mt-2 text-[#f2f5f7]">Clipboard access was blocked</h3>
+                </div>
+                <button onClick={() => setManualCopyOpen(false)} className="px-3 py-2 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Close</button>
+              </div>
+              <div className="p-5 md:p-7 space-y-4">
+                <div className="text-[11px] leading-6 text-[#95a1aa]">Select all and copy this manually. EdgeOne should behave better than preview, but this fallback keeps the feature usable.</div>
+                <textarea
+                  readOnly
+                  value={activeReport.reportText}
+                  className="w-full h-[420px] bg-[#050709] border border-white/10 p-4 text-sm leading-6 text-[#d9dfe3] outline-none resize-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {reportOpen && (
+          <div className="fixed inset-0 z-50 bg-black/82 p-4 md:p-8 flex items-center justify-center">
+            <div className="w-full max-w-5xl border border-emerald-400/20 bg-[#05080a] shadow-[0_20px_80px_rgba(0,0,0,0.7)] overflow-hidden">
+              <div className="flex items-center justify-between gap-4 border-b border-emerald-400/10 px-5 md:px-7 py-5">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.24em] text-emerald-300/65">Generated report frame</div>
+                  <h3 className="text-2xl mt-2 text-[#f2f5f7]">{activeReport.theater.title}</h3>
+                </div>
+                <button onClick={() => setReportOpen(false)} className="px-3 py-2 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Close</button>
+              </div>
+
+              <div className="p-5 md:p-7 space-y-6 max-h-[78vh] overflow-y-auto">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 border border-white/10">
+                  <div className="bg-[#050709] px-4 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Product</div><div className="mt-2 text-sm">{activeReport.theater.short} // {activeReport.theater.codename}</div></div>
+                  <div className="bg-[#050709] px-4 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Posture</div><div className="mt-2 text-sm text-emerald-300">{activeReport.runtime.posture}</div></div>
+                  <div className="bg-[#050709] px-4 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Confidence</div><div className="mt-2 text-sm">{activeReport.runtime.confidence}</div></div>
+                  <div className="bg-[#050709] px-4 py-3"><div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Last Refresh</div><div className="mt-2 text-sm">{activeReport.runtime.lastUpdated}</div></div>
+                </div>
+
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Current status</div>
+                  <p className="mt-3 text-sm leading-7 text-[#c7d0d6]">{activeReport.runtime.currentStatus}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f] mb-3">Operational stress bars</div>
+                    <div className="space-y-3">
+                      {activeReport.runtime.sectors.map((sector) => (
+                        <div key={sector.name}>
+                          <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]"><span>{sector.name}</span><span>{sector.value}</span></div>
+                          <div className="h-3 bg-[#0b1114] border border-white/5"><div className="h-full bg-emerald-300/85" style={{ width: `${sector.value}%` }} /></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f] mb-3">Relative comparison bars</div>
+                    <div className="space-y-3">
+                      {activeReport.trendBars.map((bar) => (
+                        <div key={bar.label}>
+                          <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]"><span>{bar.label}</span><span>{bar.friendly} / {bar.opposing}</span></div>
+                          <div className="space-y-1">
+                            <div className="h-3 bg-[#0b1114] border border-white/5"><div className="h-full bg-emerald-300/85" style={{ width: `${bar.friendly}%` }} /></div>
+                            <div className="h-3 bg-[#0b1114] border border-white/5"><div className="h-full bg-[#7e8a93]" style={{ width: `${bar.opposing}%` }} /></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Executive overview</div>
+                  <p className="mt-3 text-sm leading-7 text-[#c7d0d6]">{activeReport.theater.overview}</p>
+                </div>
+
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Priority indicators</div>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {activeReport.theater.indicators.map((item) => (
+                      <div key={item} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">{item}</div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <button disabled={exportingPdf} onClick={handleExportPDF} className="px-3 py-2 border border-emerald-300 bg-emerald-300/10 text-xs uppercase tracking-[0.18em] text-emerald-200 disabled:opacity-60">{exportingPdf ? "Exporting" : "Export PDF"}</button>
+                  <button onClick={handleExportTXT} className="px-3 py-2 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Export TXT</button>
+                  <button onClick={handleExportJSON} className="px-3 py-2 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Export JSON</button>
+                  <button onClick={handleCopyBrief} className="px-3 py-2 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30">Copy Brief</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

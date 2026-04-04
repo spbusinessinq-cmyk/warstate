@@ -16,6 +16,21 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+### WARSTATE (`artifacts/warstate`)
+- **Type**: react-vite
+- **Preview path**: `/`
+- **Description**: Battlefield status monitor and report generator for 10 active conflict theaters
+- **Key features**:
+  - 10 conflict theater grids (Iran, Ukraine, Gaza, Lebanon, Syria, Yemen, Sudan, Myanmar, Eastern DRC, Taiwan)
+  - Theater search/filter, sector stress bars, force comparison ledger
+  - Live refresh with posture/confidence cycling
+  - Report generation with modal viewer
+  - Export to PDF (jspdf), TXT, JSON; copy brief to clipboard; print
+- **Data**: All static data in `src/data/theaters.ts`
+- **Dependencies**: jspdf (lazy-loaded on PDF export), wouter, tailwindcss
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck across all packages
