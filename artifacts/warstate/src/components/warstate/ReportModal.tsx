@@ -20,101 +20,104 @@ export function ReportModal({
   onCopyBrief,
 }: ReportModalProps) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 p-4 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-5xl border border-emerald-400/20 bg-[#05080a] shadow-[0_24px_80px_rgba(0,0,0,0.75)] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/90 p-4 md:p-8 flex items-center justify-center font-mono">
+      <div className="w-full max-w-5xl border border-[#1a2830] bg-[#070a0e] shadow-[0_28px_80px_rgba(0,0,0,0.85)] overflow-hidden">
 
-        {/* Modal header */}
-        <div className="flex items-center justify-between gap-4 border-b border-emerald-400/12 px-6 md:px-7 py-5">
+        {/* ── Modal header ── */}
+        <div className="flex items-start justify-between gap-4 border-b border-[#111c24] px-6 md:px-7 py-5">
           <div>
-            <div className="text-[9px] uppercase tracking-[0.28em] text-emerald-300/60 mb-2">
-              Generated Report Frame — Locked Snapshot
+            <div className="text-[9px] uppercase tracking-[0.32em] text-[#2e5c48] mb-3">
+              Generated Report &nbsp;//&nbsp; Locked Snapshot
             </div>
-            <h3 className="text-2xl text-[#f2f5f7]">{report.theater.title}</h3>
+            <h3 className="text-2xl text-[#eef2f4] font-semibold">{report.theater.title}</h3>
+            <div className="text-[10px] text-[#52666e] uppercase tracking-[0.2em] mt-1">
+              {report.theater.codename} &nbsp;//&nbsp; {report.runtime.lastUpdated}
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.2em] hover:border-emerald-400/30 transition-colors"
+            className="mt-1 px-4 py-2 border border-[#1a2830] bg-[#060a0d] text-[10px] uppercase tracking-[0.22em] text-[#52666e] hover:border-[#1e3d2e] hover:text-[#8a9eaa] transition-colors"
           >
             Close
           </button>
         </div>
 
-        <div className="p-6 md:p-7 space-y-7 max-h-[78vh] overflow-y-auto">
+        {/* ── Scrollable body ── */}
+        <div className="p-6 md:p-7 space-y-7 max-h-[80vh] overflow-y-auto">
 
           {/* Summary strip */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/8 border border-white/10">
-            <div className="bg-[#050709] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.24em] text-[#6e7d87] mb-2">Product</div>
-              <div className="text-sm">{report.theater.short} // {report.theater.codename}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#111c24] border border-[#1a2830]">
+            <div className="bg-[#060a0d] px-4 py-4">
+              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Theater</div>
+              <div className="text-sm text-[#c4d0d8]">{report.theater.short}</div>
             </div>
-            <div className="bg-[#050709] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.24em] text-[#6e7d87] mb-2">Posture</div>
-              <div className="text-sm text-emerald-300">{report.runtime.posture}</div>
+            <div className="bg-[#060a0d] px-4 py-4">
+              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Posture</div>
+              <div className="text-sm text-[#4caf87]">{report.runtime.posture}</div>
             </div>
-            <div className="bg-[#050709] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.24em] text-[#6e7d87] mb-2">Confidence</div>
-              <div className="text-sm">{report.runtime.confidence}</div>
+            <div className="bg-[#060a0d] px-4 py-4">
+              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Confidence</div>
+              <div className="text-sm text-[#c4d0d8]">{report.runtime.confidence}</div>
             </div>
-            <div className="bg-[#050709] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.24em] text-[#6e7d87] mb-2">Last Refresh</div>
-              <div className="text-sm">{report.runtime.lastUpdated}</div>
+            <div className="bg-[#060a0d] px-4 py-4">
+              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Classification</div>
+              <div className="text-sm text-[#c4d0d8]">{report.theater.classification}</div>
             </div>
           </div>
 
           {/* Current Status */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Current Status</div>
-            <p className="text-sm leading-7 text-[#c7d0d6]">{report.runtime.currentStatus}</p>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Current Status</div>
+            <p className="text-sm leading-7 text-[#8a9eaa]">{report.runtime.currentStatus}</p>
           </div>
 
-          {/* Bar charts */}
+          {/* Bar charts — side by side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Sector stress */}
             <div className="space-y-4">
-              <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87]">
-                Operational Stress Bars
-              </div>
+              <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Sector Stress Index</div>
               {report.runtime.sectors.map((sector) => (
                 <div key={sector.name}>
-                  <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]">
+                  <div className="flex justify-between text-[11px] text-[#8a9eaa] mb-2 uppercase tracking-[0.14em]">
                     <span>{sector.name}</span>
-                    <span className="tabular-nums">{sector.value}</span>
+                    <span className="tabular-nums text-[#52666e]">{sector.value}</span>
                   </div>
-                  <div className="h-3 bg-[#0b1114] border border-white/5">
+                  <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
                     <div
-                      className="h-full bg-emerald-300/85"
+                      className="h-full bg-[#1c6348]"
                       style={{ width: `${sector.value}%` }}
                     />
                   </div>
                 </div>
               ))}
             </div>
+
+            {/* Comparison bars */}
             <div className="space-y-4">
-              <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87]">
-                Relative Comparison Bars
-              </div>
+              <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Relative Attrition</div>
               {report.trendBars.map((bar) => (
                 <div key={bar.label}>
-                  <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]">
+                  <div className="flex justify-between text-[11px] text-[#8a9eaa] mb-2 uppercase tracking-[0.14em]">
                     <span>{bar.label}</span>
-                    <span className="tabular-nums">{bar.friendly} / {bar.opposing}</span>
+                    <span className="tabular-nums text-[#52666e]">{bar.friendly} / {bar.opposing}</span>
                   </div>
                   <div className="space-y-1">
-                    <div className="h-3 bg-[#0b1114] border border-white/5">
-                      <div className="h-full bg-emerald-300/85" style={{ width: `${bar.friendly}%` }} />
+                    <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
+                      <div className="h-full bg-[#1c6348]" style={{ width: `${bar.friendly}%` }} />
                     </div>
-                    <div className="h-3 bg-[#0b1114] border border-white/5">
-                      <div className="h-full bg-[#7e8a93]" style={{ width: `${bar.opposing}%` }} />
+                    <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
+                      <div className="h-full bg-[#374a56]" style={{ width: `${bar.opposing}%` }} />
                     </div>
                   </div>
                 </div>
               ))}
-              <div className="flex gap-5 text-[9px] uppercase tracking-[0.18em] text-[#6e7d87] pt-2 border-t border-white/5">
+              <div className="flex gap-5 text-[9px] uppercase tracking-[0.18em] text-[#364a56] pt-3 border-t border-[#111c24]">
                 <span className="flex items-center gap-2">
-                  <span className="inline-block w-3 h-2 bg-emerald-300/85" />
+                  <span className="inline-block w-3 h-1.5 bg-[#1c6348]" />
                   {report.theater.friendly.label}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="inline-block w-3 h-2 bg-[#7e8a93]" />
+                  <span className="inline-block w-3 h-1.5 bg-[#374a56]" />
                   {report.theater.opposing.label}
                 </span>
               </div>
@@ -123,20 +126,48 @@ export function ReportModal({
 
           {/* Executive Overview */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Executive Overview</div>
-            <p className="text-sm leading-7 text-[#c7d0d6]">{report.theater.overview}</p>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Executive Overview</div>
+            <p className="text-sm leading-7 text-[#8a9eaa]">{report.theater.overview}</p>
+          </div>
+
+          {/* Force Ledger */}
+          <div>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Force Ledger</div>
+            <div className="border border-[#1a2830] overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-[#060a0d] border-b border-[#1a2830]">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">Metric</th>
+                    <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">{report.theater.friendly.label}</th>
+                    <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">{report.theater.opposing.label}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.comparisonRows.map(([metric, friendly, opposing], idx) => (
+                    <tr
+                      key={metric}
+                      className={`border-b border-[#111c24] last:border-0 ${idx % 2 === 0 ? "bg-[#060a0d]" : "bg-[#080e0b]"}`}
+                    >
+                      <td className="px-4 py-3 text-[#c4d0d8]">{metric}</td>
+                      <td className="px-4 py-3 text-[#8a9eaa]">{friendly}</td>
+                      <td className="px-4 py-3 text-[#8a9eaa]">{opposing}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Priority Indicators */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Priority Indicators</div>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Priority Indicators</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {report.theater.indicators.map((item, idx) => (
                 <div
                   key={item}
-                  className="border border-white/8 bg-[#050709] px-4 py-3 text-sm leading-6 text-[#c7d0d6]"
+                  className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
                 >
-                  <span className="text-[#6e7d87] text-[10px] tracking-[0.14em] mr-2">{idx + 1}.</span>
+                  <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
                   {item}
                 </div>
               ))}
@@ -145,14 +176,14 @@ export function ReportModal({
 
           {/* Source Stack */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Source Stack</div>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Source Stack</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {report.theater.sources.map((source, idx) => (
                 <div
                   key={source}
-                  className="border border-white/8 bg-[#050709] px-4 py-3 text-sm leading-6 text-[#c7d0d6]"
+                  className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
                 >
-                  <span className="text-[#6e7d87] text-[10px] tracking-[0.14em] mr-2">{idx + 1}.</span>
+                  <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
                   {source}
                 </div>
               ))}
@@ -160,29 +191,29 @@ export function ReportModal({
           </div>
 
           {/* Export actions */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-white/8">
+          <div className="flex flex-wrap gap-2 pt-4 border-t border-[#111c24]">
             <button
               disabled={exportingPdf}
               onClick={onExportPDF}
-              className="px-4 py-2.5 border border-emerald-300 bg-emerald-300/10 text-xs uppercase tracking-[0.2em] text-emerald-200 hover:bg-emerald-300/18 disabled:opacity-50 transition-colors"
+              className="px-5 py-3 border border-[#265c42] bg-[#071812] text-[11px] uppercase tracking-[0.22em] text-[#5ec998] hover:bg-[#0a2018] disabled:opacity-50 transition-colors"
             >
               {exportingPdf ? "Exporting..." : "Export PDF"}
             </button>
             <button
               onClick={onExportTXT}
-              className="px-4 py-2.5 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.2em] hover:border-emerald-400/30 transition-colors"
+              className="px-5 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.22em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
             >
               Export TXT
             </button>
             <button
               onClick={onExportJSON}
-              className="px-4 py-2.5 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.2em] hover:border-emerald-400/30 transition-colors"
+              className="px-5 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.22em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
             >
               Export JSON
             </button>
             <button
               onClick={onCopyBrief}
-              className="px-4 py-2.5 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.2em] hover:border-emerald-400/30 transition-colors"
+              className="px-5 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.22em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
             >
               Copy Brief
             </button>

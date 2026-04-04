@@ -16,6 +16,26 @@ import { ManualCopyModal } from "@/components/warstate/ManualCopyModal";
 
 type PanelId = "overview" | "ledger" | "indicators" | "stress" | "sources";
 
+// ─── Color tokens (Splinter Cell tactical palette) ───────────────────────────
+// BG_PAGE      #020304   near-pure black
+// BG_SHELL     #070a0e   primary container surface
+// BG_PANEL     #09100d   panel surface (very slight warm-dark tint)
+// BG_CARD      #060a0d   sunken card
+// BG_ACTIVE    #071812   active state tint
+// BD_DEFAULT   #1a2830   steel blue-gray border
+// BD_SUBTLE    #111c24   very subtle border
+// BD_ACTIVE    #265c42   muted green border (active only)
+// BD_HOVER     #1e3d2e   hover border
+// TX_PRIMARY   #c4d0d8   main text
+// TX_SECONDARY #8a9eaa   secondary text
+// TX_MUTED     #52666e   label text
+// TX_ACCENT    #4caf87   green accent (muted, restrained)
+// TX_ACTIVE    #5ec998   active state green text
+// BAR_FILL     #1c6348   tactical green bar fill
+// BAR_TRACK    #0a1214   dark bar track
+// BAR_OPP      #374a56   opposing force bar (steel)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function Warstate() {
   const [selectedTheaterId, setSelectedTheaterId] = useState("iran");
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -65,7 +85,6 @@ export default function Warstate() {
   const trendBars = useMemo(() => buildTrendBars(theater), [theater]);
   const reportText = useMemo(() => buildReportText(theater, runtime), [theater, runtime]);
 
-  // activeReport is always a frozen snapshot if generated, otherwise live state
   const activeReport: ReportSnapshot = generatedReport ?? {
     theater,
     runtime,
@@ -162,10 +181,10 @@ export default function Warstate() {
     <button
       key={id}
       onClick={() => setExpandedPanel(id)}
-      className={`px-4 py-2 border text-[10px] uppercase tracking-[0.22em] transition-colors ${
+      className={`px-4 py-2 border text-[10px] uppercase tracking-[0.2em] transition-colors ${
         expandedPanel === id
-          ? "border-emerald-300 bg-emerald-300/10 text-emerald-200"
-          : "border-white/10 bg-[#050709] text-[#9ba6ae] hover:border-emerald-400/30 hover:text-[#d7dde2]"
+          ? "border-[#265c42] bg-[#071812] text-[#5ec998]"
+          : "border-[#1a2830] bg-[#060a0d] text-[#52666e] hover:border-[#1e3d2e] hover:text-[#8a9eaa]"
       }`}
     >
       {label}
@@ -173,60 +192,67 @@ export default function Warstate() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020405] text-[#d9dfe3] p-3 md:p-6 font-mono">
+    <div className="min-h-screen bg-[#020304] text-[#c4d0d8] p-3 md:p-6 font-mono">
       <div className="max-w-[1700px] mx-auto space-y-4">
 
-        {/* Toast notification */}
+        {/* ── Toast ── */}
         {toast && (
-          <div className="border border-emerald-300/40 bg-[#061110] px-5 py-3 text-xs uppercase tracking-[0.24em] text-emerald-200">
+          <div className="border border-[#265c42] bg-[#040e0a] px-5 py-3 text-xs uppercase tracking-[0.26em] text-[#5ec998]">
             {toast}
           </div>
         )}
 
-        <div className="border border-emerald-400/20 bg-[#05080a] shadow-[0_20px_80px_rgba(0,0,0,0.6)]">
+        {/* ── Main shell ── */}
+        <div className="border border-[#1a2830] bg-[#070a0e] shadow-[0_24px_80px_rgba(0,0,0,0.7)]">
 
-          {/* ── Header ── */}
-          <div className="border-b border-emerald-400/15 px-4 md:px-6 py-5 space-y-5">
-            <div className="grid grid-cols-1 xl:grid-cols-[1.25fr_0.95fr] gap-5 items-end">
-              {/* Branding */}
-              <div className="space-y-2 min-w-0">
-                <div className="text-[11px] tracking-[0.34em] uppercase text-emerald-300/60">
-                  RSR White Wing // WARSTATE // Operational Status System
+          {/* ════════════════════════════════
+              HEADER BLOCK
+          ════════════════════════════════ */}
+          <div className="border-b border-[#111c24] px-5 md:px-7 py-6 space-y-6">
+
+            {/* Brand + status strip */}
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_auto] gap-5 items-end">
+              <div className="space-y-2">
+                <div className="text-[10px] tracking-[0.38em] uppercase text-[#2e5c48]">
+                  RSR White Wing &nbsp;//&nbsp; WARSTATE &nbsp;//&nbsp; Operational Status System
                 </div>
-                <h1 className="text-5xl md:text-6xl font-semibold leading-none tracking-tight">WARSTATE</h1>
-                <div className="text-sm text-[#8f9aa3] uppercase tracking-[0.2em]">
-                  Battlefield Status Monitor and Report Generator
+                <h1 className="text-5xl md:text-7xl font-bold leading-none tracking-tight text-[#eef2f4]">
+                  WARSTATE
+                </h1>
+                <div className="text-[11px] text-[#52666e] uppercase tracking-[0.22em] pt-1">
+                  Battlefield Status Monitor &amp; Report Generator
                 </div>
               </div>
 
-              {/* Status summary strip */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-emerald-400/15 border border-emerald-400/15 min-w-0">
-                <div className="bg-[#06090b] px-4 py-4">
-                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Theater</div>
-                  <div className="mt-2 text-sm truncate">{theater.short}</div>
+              {/* Live status strip */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#1a2830] border border-[#1a2830]">
+                <div className="bg-[#060a0d] px-5 py-4">
+                  <div className="text-[9px] text-[#52666e] uppercase tracking-[0.28em] mb-2">Theater</div>
+                  <div className="text-sm text-[#c4d0d8] truncate">{theater.short}</div>
                 </div>
-                <div className="bg-[#06090b] px-4 py-4">
-                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Codename</div>
-                  <div className="mt-2 text-sm text-emerald-300 truncate">{theater.codename}</div>
+                <div className="bg-[#060a0d] px-5 py-4">
+                  <div className="text-[9px] text-[#52666e] uppercase tracking-[0.28em] mb-2">Codename</div>
+                  <div className="text-sm text-[#4caf87] truncate">{theater.codename}</div>
                 </div>
-                <div className="bg-[#06090b] px-4 py-4">
-                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Posture</div>
-                  <div className="mt-2 text-sm text-emerald-300 truncate">{runtime.posture}</div>
+                <div className="bg-[#060a0d] px-5 py-4">
+                  <div className="text-[9px] text-[#52666e] uppercase tracking-[0.28em] mb-2">Posture</div>
+                  <div className="text-sm text-[#4caf87] truncate">{runtime.posture}</div>
                 </div>
-                <div className="bg-[#06090b] px-4 py-4">
-                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Last Refresh</div>
-                  <div className="mt-2 text-sm truncate">{runtime.lastUpdated}</div>
+                <div className="bg-[#060a0d] px-5 py-4">
+                  <div className="text-[9px] text-[#52666e] uppercase tracking-[0.28em] mb-2">Last Refresh</div>
+                  <div className="text-sm text-[#c4d0d8] truncate">{runtime.lastUpdated}</div>
                 </div>
               </div>
             </div>
 
+            {/* Registry + Actions row */}
             <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_1fr] gap-5">
 
               {/* ── Conflict Registry ── */}
-              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-4">
+              <div className="border border-[#1a2830] bg-[#09100d] px-5 py-4 space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">Conflict Registry</div>
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-[#6e7d87]">
+                  <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Conflict Registry</div>
+                  <div className="text-[9px] uppercase tracking-[0.22em] text-[#52666e]">
                     {filteredTheaters.length} visible
                   </div>
                 </div>
@@ -235,18 +261,18 @@ export default function Warstate() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search theater, region, codename..."
-                    className="flex-1 bg-[#050709] border border-white/10 px-3 py-2.5 text-sm outline-none placeholder:text-[#5e6d77] focus:border-emerald-400/35 transition-colors"
+                    className="flex-1 bg-[#060a0d] border border-[#1a2830] px-3 py-2.5 text-sm text-[#c4d0d8] outline-none placeholder:text-[#2e4050] focus:border-[#1e3d2e] transition-colors"
                   />
                   {search && (
                     <button
                       onClick={() => setSearch("")}
-                      className="px-3 py-2.5 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.16em] hover:border-emerald-400/30 transition-colors whitespace-nowrap"
+                      className="px-3 py-2.5 border border-[#1a2830] bg-[#060a0d] text-[10px] uppercase tracking-[0.18em] text-[#52666e] hover:border-[#1e3d2e] hover:text-[#8a9eaa] transition-colors whitespace-nowrap"
                     >
                       Clear
                     </button>
                   )}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                   {filteredTheaters.map((id) => {
                     const entry = THEATERS[id];
                     const active = id === selectedTheaterId;
@@ -257,19 +283,19 @@ export default function Warstate() {
                         title={`${entry.short} // ${entry.codename}`}
                         className={`px-3 py-3 border text-xs text-left transition-colors ${
                           active
-                            ? "border-emerald-300 bg-emerald-300/10 text-emerald-200"
-                            : "border-white/10 bg-[#050709] text-[#9ba6ae] hover:border-emerald-400/30 hover:text-[#d7dde2]"
+                            ? "border-[#265c42] bg-[#071812] text-[#5ec998]"
+                            : "border-[#1a2830] bg-[#060a0d] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8]"
                         }`}
                       >
-                        <div className="uppercase tracking-[0.16em] font-semibold">{entry.short}</div>
-                        <div className="mt-1 text-[9px] uppercase tracking-[0.14em] opacity-60">
+                        <div className="uppercase tracking-[0.16em] font-bold">{entry.short}</div>
+                        <div className={`mt-1 text-[9px] uppercase tracking-[0.14em] ${active ? "text-[#3d8a66]" : "text-[#364a56]"}`}>
                           {entry.codename}
                         </div>
                       </button>
                     );
                   })}
                   {filteredTheaters.length === 0 && (
-                    <div className="col-span-5 py-6 text-center text-xs text-[#5e6d77] uppercase tracking-[0.22em]">
+                    <div className="col-span-5 py-6 text-center text-[10px] text-[#364a56] uppercase tracking-[0.22em]">
                       No theaters match query
                     </div>
                   )}
@@ -277,124 +303,140 @@ export default function Warstate() {
               </div>
 
               {/* ── Actions ── */}
-              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-4">
-                <div className="text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">Actions</div>
+              <div className="border border-[#1a2830] bg-[#09100d] px-5 py-4 space-y-4">
+                <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Actions</div>
+
+                {/* Primary CTA */}
+                <button
+                  onClick={handleGenerateReport}
+                  className="w-full px-4 py-4 border border-[#265c42] bg-[#071812] text-sm uppercase tracking-[0.22em] text-[#5ec998] hover:bg-[#0a2018] hover:border-[#306e4e] transition-colors"
+                >
+                  Generate Report
+                </button>
+
+                {/* Secondary actions grid */}
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     disabled={refreshing}
                     onClick={handleRefresh}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-50 transition-colors"
+                    className="px-3 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.18em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] disabled:opacity-50 transition-colors"
                   >
                     {refreshing ? "Refreshing..." : "Live Refresh"}
                   </button>
                   <button
-                    onClick={handleGenerateReport}
-                    className="px-3 py-3 border border-emerald-300 bg-emerald-300/10 text-xs uppercase tracking-[0.18em] text-emerald-200 hover:bg-emerald-300/18 transition-colors"
-                  >
-                    Generate Report
-                  </button>
-                  <button
                     disabled={exportingPdf}
                     onClick={handleExportPDF}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-50 transition-colors"
+                    className="px-3 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.18em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] disabled:opacity-50 transition-colors"
                   >
                     {exportingPdf ? "Exporting..." : "Export PDF"}
                   </button>
                   <button
                     onClick={handleExportTXT}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 transition-colors"
+                    className="px-3 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.18em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
                   >
                     Export TXT
                   </button>
                   <button
                     onClick={handleExportJSON}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 transition-colors"
+                    className="px-3 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.18em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
                   >
                     Export JSON
                   </button>
                   <button
                     onClick={handleCopyBrief}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 transition-colors"
+                    className="px-3 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.18em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
                   >
                     Copy Brief
                   </button>
                   <button
                     onClick={handlePrint}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 transition-colors"
+                    className="px-3 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.18em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
                   >
                     Print Report
                   </button>
                   <button
                     onClick={() => setSearch("")}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 transition-colors"
+                    className="col-span-2 px-3 py-2.5 border border-[#111c24] bg-[#060a0d] text-[10px] uppercase tracking-[0.18em] text-[#364a56] hover:border-[#1a2830] hover:text-[#52666e] transition-colors"
                   >
                     Clear Search
                   </button>
                 </div>
-                <div className="text-[10px] leading-6 text-[#8a9aa4] border-t border-white/5 pt-3">
+
+                {/* Report lock status */}
+                <div className="text-[10px] leading-5 text-[#364a56] border-t border-[#111c24] pt-3">
                   {generatedReport
-                    ? `Report locked: ${generatedReport.theater.short} // ${generatedReport.runtime.lastUpdated}`
-                    : "No active report — exports use live state until report is generated."}
+                    ? `Locked: ${generatedReport.theater.short} // ${generatedReport.runtime.lastUpdated}`
+                    : "No locked report — exports use live state until generated."}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ── Main Content ── */}
-          <div className="p-4 md:p-6 space-y-4">
-            <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-4">
+          {/* ════════════════════════════════
+              MAIN CONTENT GRID
+          ════════════════════════════════ */}
+          <div className="p-5 md:p-7 space-y-5">
+            <div className="grid grid-cols-1 xl:grid-cols-[0.85fr_1.15fr] gap-5">
 
-              {/* ── Current Status panel ── */}
-              <div className="border border-emerald-400/15 bg-[#06090b]">
-                <div className="border-b border-emerald-400/10 px-5 py-3 text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">
-                  Current Status
+              {/* ── Current Status ── */}
+              <div className="border border-[#1a2830] bg-[#09100d]">
+                <div className="border-b border-[#111c24] px-5 py-3">
+                  <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Current Status</div>
                 </div>
-                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-5">
-                    <div>
-                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Product</div>
-                      <div className="text-lg leading-tight text-[#f2f5f7]">{theater.title}</div>
+                <div className="p-5 space-y-5">
+
+                  {/* Product title */}
+                  <div>
+                    <div className="text-[9px] uppercase tracking-[0.28em] text-[#52666e] mb-2">Product</div>
+                    <div className="text-xl leading-tight text-[#eef2f4] font-semibold">{theater.title}</div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#52666e] mb-2">Classification</div>
+                        <div className="text-sm text-[#8a9eaa] leading-6">{theater.classification}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#52666e] mb-2">Source Discipline</div>
+                        <div className="text-sm text-[#8a9eaa] leading-6">{theater.sourceDiscipline}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Classification</div>
-                      <div className="text-sm text-[#c0c9cf] leading-6">{theater.classification}</div>
-                    </div>
-                    <div>
-                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Source Discipline</div>
-                      <div className="text-sm leading-6 text-[#c0c9cf]">{theater.sourceDiscipline}</div>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#52666e] mb-2">Status Line</div>
+                        <div className="text-sm text-[#b0bec6] leading-6">{runtime.currentStatus}</div>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-5">
-                    <div>
-                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Status Line</div>
-                      <div className="text-sm leading-6 text-[#c0c9cf]">{runtime.currentStatus}</div>
+
+                  {/* Stat grid */}
+                  <div className="grid grid-cols-2 gap-px bg-[#111c24]">
+                    <div className="bg-[#060a0d] px-4 py-3">
+                      <div className="text-[9px] uppercase tracking-[0.24em] text-[#52666e] mb-2">Region</div>
+                      <div className="text-sm text-[#c4d0d8]">{theater.region}</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-px bg-white/8">
-                      <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Region</div>
-                        <div className="text-sm">{theater.region}</div>
-                      </div>
-                      <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Confidence</div>
-                        <div className="text-sm">{runtime.confidence}</div>
-                      </div>
-                      <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Refresh Count</div>
-                        <div className="text-sm">{refreshCount}</div>
-                      </div>
-                      <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Engine</div>
-                        <div className="text-sm">REPORT CORE</div>
-                      </div>
+                    <div className="bg-[#060a0d] px-4 py-3">
+                      <div className="text-[9px] uppercase tracking-[0.24em] text-[#52666e] mb-2">Confidence</div>
+                      <div className="text-sm text-[#c4d0d8]">{runtime.confidence}</div>
+                    </div>
+                    <div className="bg-[#060a0d] px-4 py-3">
+                      <div className="text-[9px] uppercase tracking-[0.24em] text-[#52666e] mb-2">Refresh Count</div>
+                      <div className="text-sm text-[#c4d0d8] tabular-nums">{refreshCount}</div>
+                    </div>
+                    <div className="bg-[#060a0d] px-4 py-3">
+                      <div className="text-[9px] uppercase tracking-[0.24em] text-[#52666e] mb-2">Engine</div>
+                      <div className="text-sm text-[#c4d0d8]">REPORT CORE</div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* ── Detail panels ── */}
-              <div className="border border-emerald-400/15 bg-[#06090b]">
-                <div className="border-b border-emerald-400/10 px-4 py-3 flex flex-wrap gap-2 items-center justify-between">
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">Detail Panels</div>
+              {/* ── Detail Panels ── */}
+              <div className="border border-[#1a2830] bg-[#09100d]">
+                {/* Panel tab bar */}
+                <div className="border-b border-[#111c24] px-4 py-3 flex flex-wrap gap-2 items-center justify-between">
+                  <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Detail Panels</div>
                   <div className="flex flex-wrap gap-2">
                     {panelButton("overview", "Overview")}
                     {panelButton("ledger", "Ledger")}
@@ -404,49 +446,53 @@ export default function Warstate() {
                   </div>
                 </div>
 
-                <div className="p-5 min-h-[440px]">
+                <div className="p-5 min-h-[460px]">
 
-                  {/* Overview */}
+                  {/* ── OVERVIEW ── */}
                   {expandedPanel === "overview" && (
                     <div className="space-y-5">
                       <div>
-                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">
-                          Executive Overview
-                        </div>
-                        <p className="text-sm leading-7 text-[#c7d0d6]">{theater.overview}</p>
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Executive Overview</div>
+                        <p className="text-sm leading-7 text-[#b0bec6]">{theater.overview}</p>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        {theater.indicators.slice(0, 3).map((item) => (
-                          <div
-                            key={item}
-                            className="border border-white/8 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]"
-                          >
-                            {item}
-                          </div>
-                        ))}
+                      <div>
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Key Indicators</div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          {theater.indicators.slice(0, 3).map((item) => (
+                            <div
+                              key={item}
+                              className="border border-[#111c24] bg-[#060a0d] px-3 py-3 text-sm leading-6 text-[#8a9eaa]"
+                            >
+                              {item}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Ledger */}
+                  {/* ── LEDGER ── */}
                   {expandedPanel === "ledger" && (
-                    <div className="border border-white/10 overflow-hidden">
+                    <div className="border border-[#1a2830] overflow-hidden">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#081014] text-[#8a9aa4] uppercase tracking-[0.18em] text-[9px]">
-                          <tr>
-                            <th className="text-left px-4 py-3 font-medium">Metric</th>
-                            <th className="text-left px-4 py-3 font-medium">{theater.friendly.label}</th>
-                            <th className="text-left px-4 py-3 font-medium">{theater.opposing.label}</th>
-                            <th className="text-left px-4 py-3 font-medium">Type</th>
+                        <thead className="bg-[#060a0d]">
+                          <tr className="border-b border-[#1a2830]">
+                            <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">Metric</th>
+                            <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">{theater.friendly.label}</th>
+                            <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">{theater.opposing.label}</th>
+                            <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">Type</th>
                           </tr>
                         </thead>
                         <tbody>
                           {comparisonRows.map(([metric, friendly, opposing, note], idx) => (
-                            <tr key={metric} className={idx % 2 === 0 ? "bg-[#050709]" : "bg-[#070b0d]"}>
-                              <td className="px-4 py-3 text-[#dde3e7]">{metric}</td>
-                              <td className="px-4 py-3 text-[#bec8ce]">{friendly}</td>
-                              <td className="px-4 py-3 text-[#bec8ce]">{opposing}</td>
-                              <td className="px-4 py-3 text-[#6e7d87] uppercase text-[9px] tracking-[0.18em]">{note}</td>
+                            <tr
+                              key={metric}
+                              className={`border-b border-[#111c24] last:border-0 ${idx % 2 === 0 ? "bg-[#060a0d]" : "bg-[#080e0b]"}`}
+                            >
+                              <td className="px-4 py-3 text-[#c4d0d8]">{metric}</td>
+                              <td className="px-4 py-3 text-[#8a9eaa]">{friendly}</td>
+                              <td className="px-4 py-3 text-[#8a9eaa]">{opposing}</td>
+                              <td className="px-4 py-3 text-[9px] uppercase tracking-[0.18em] text-[#364a56]">{note}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -454,17 +500,17 @@ export default function Warstate() {
                     </div>
                   )}
 
-                  {/* Indicators */}
+                  {/* ── INDICATORS ── */}
                   {expandedPanel === "indicators" && (
                     <div className="space-y-3">
-                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Priority Indicators</div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Priority Indicators</div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {theater.indicators.map((item, idx) => (
                           <div
                             key={item}
-                            className="border border-white/8 bg-[#050709] px-4 py-3 text-sm leading-6 text-[#c7d0d6]"
+                            className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
                           >
-                            <span className="text-[#6e7d87] text-[10px] tracking-[0.14em] mr-2">{idx + 1}.</span>
+                            <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
                             {item}
                           </div>
                         ))}
@@ -472,22 +518,22 @@ export default function Warstate() {
                     </div>
                   )}
 
-                  {/* Stress */}
+                  {/* ── STRESS ── */}
                   {expandedPanel === "stress" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-5">
-                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87]">
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">
                           Sector Stress Index
                         </div>
                         {runtime.sectors.map((sector) => (
                           <div key={sector.name}>
-                            <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]">
+                            <div className="flex justify-between text-[11px] text-[#8a9eaa] mb-2 uppercase tracking-[0.14em]">
                               <span>{sector.name}</span>
-                              <span className="tabular-nums">{sector.value}</span>
+                              <span className="tabular-nums text-[#52666e]">{sector.value}</span>
                             </div>
-                            <div className="h-3 bg-[#0b1114] border border-white/5">
+                            <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
                               <div
-                                className="h-full bg-emerald-300/85 transition-all duration-700"
+                                className="h-full bg-[#1c6348] transition-all duration-700"
                                 style={{ width: `${sector.value}%` }}
                               />
                             </div>
@@ -495,40 +541,38 @@ export default function Warstate() {
                         ))}
                       </div>
                       <div className="space-y-5">
-                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87]">
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">
                           Relative Attrition
                         </div>
                         {trendBars.map((bar) => (
                           <div key={bar.label}>
-                            <div className="flex justify-between gap-4 text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]">
+                            <div className="flex justify-between gap-4 text-[11px] text-[#8a9eaa] mb-2 uppercase tracking-[0.14em]">
                               <span>{bar.label}</span>
-                              <span className="tabular-nums">
-                                {bar.friendly} / {bar.opposing}
-                              </span>
+                              <span className="tabular-nums text-[#52666e]">{bar.friendly} / {bar.opposing}</span>
                             </div>
                             <div className="space-y-1">
-                              <div className="h-3 bg-[#0b1114] border border-white/5">
+                              <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
                                 <div
-                                  className="h-full bg-emerald-300/85 transition-all duration-700"
+                                  className="h-full bg-[#1c6348] transition-all duration-700"
                                   style={{ width: `${bar.friendly}%` }}
                                 />
                               </div>
-                              <div className="h-3 bg-[#0b1114] border border-white/5">
+                              <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
                                 <div
-                                  className="h-full bg-[#7e8a93] transition-all duration-700"
+                                  className="h-full bg-[#374a56] transition-all duration-700"
                                   style={{ width: `${bar.opposing}%` }}
                                 />
                               </div>
                             </div>
                           </div>
                         ))}
-                        <div className="flex gap-5 text-[9px] uppercase tracking-[0.18em] text-[#6e7d87] pt-2 border-t border-white/5">
+                        <div className="flex gap-5 text-[9px] uppercase tracking-[0.18em] text-[#364a56] pt-3 border-t border-[#111c24]">
                           <span className="flex items-center gap-2">
-                            <span className="inline-block w-3 h-2 bg-emerald-300/85" />
+                            <span className="inline-block w-3 h-1.5 bg-[#1c6348]" />
                             {theater.friendly.label}
                           </span>
                           <span className="flex items-center gap-2">
-                            <span className="inline-block w-3 h-2 bg-[#7e8a93]" />
+                            <span className="inline-block w-3 h-1.5 bg-[#374a56]" />
                             {theater.opposing.label}
                           </span>
                         </div>
@@ -536,17 +580,17 @@ export default function Warstate() {
                     </div>
                   )}
 
-                  {/* Sources */}
+                  {/* ── SOURCES ── */}
                   {expandedPanel === "sources" && (
-                    <div className="space-y-4">
-                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Source Stack</div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-3">
+                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Source Stack</div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {theater.sources.map((source, idx) => (
                           <div
                             key={source}
-                            className="border border-white/8 bg-[#050709] px-4 py-3 text-sm leading-6 text-[#c7d0d6]"
+                            className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
                           >
-                            <span className="text-[#6e7d87] text-[10px] tracking-[0.14em] mr-2">{idx + 1}.</span>
+                            <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
                             {source}
                           </div>
                         ))}
@@ -560,7 +604,7 @@ export default function Warstate() {
         </div>
       </div>
 
-      {/* Manual copy fallback modal */}
+      {/* ── Modals ── */}
       {manualCopyOpen && (
         <ManualCopyModal
           reportText={activeReport.reportText}
@@ -568,7 +612,6 @@ export default function Warstate() {
         />
       )}
 
-      {/* Report modal */}
       {reportOpen && (
         <ReportModal
           report={activeReport}

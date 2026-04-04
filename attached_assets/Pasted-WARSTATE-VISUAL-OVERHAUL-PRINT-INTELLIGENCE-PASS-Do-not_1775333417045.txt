@@ -1,0 +1,297 @@
+WARSTATE — VISUAL OVERHAUL + PRINT INTELLIGENCE PASS
+
+Do not scrap the app.
+Do not remove current working systems.
+Keep WARSTATE as one unified battlefield status system.
+
+This pass is a full refinement pass for:
+1. UI visual overhaul
+2. printable report redesign
+3. PDF clarity
+4. spacing / hierarchy / depth
+5. deployment readiness
+
+━━━━━━━━━━━━━━━━━━
+PRIMARY OBJECTIVE
+━━━━━━━━━━━━━━━━━━
+
+Turn WARSTATE into a polished internal intelligence system with:
+
+- black main foundation
+- restrained Splinter Cell green accents
+- sharper hierarchy
+- deeper panel design
+- cleaner spacing
+- cleaner typography
+- better active states
+- much stronger printable/exportable report output
+
+The app should feel like:
+“internal intelligence software with discipline”
+
+Not:
+- generic dashboard
+- terminal dump
+- glowing hacker toy
+- bubbly UI
+- crowded report page
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — FULL UI OVERHAUL
+━━━━━━━━━━━━━━━━━━
+
+Redesign the live UI styling while preserving current functionality.
+
+MANDATES:
+- black main base
+- deep charcoal / graphite surfaces
+- restrained emerald / Splinter Cell green accents only where needed
+- subtle steel / gray borders
+- stronger depth and hierarchy
+- cleaner spacing rhythm
+- improved typography
+- less visual noise
+
+Improve:
+- top command strip
+- status cards
+- conflict registry
+- action buttons
+- current status area
+- detail panel tabs
+- panel interiors
+- bar modules
+- report modal
+
+Requirements:
+- sharper visual hierarchy
+- better spacing between headings and body text
+- stronger card depth
+- improved padding
+- better section balance
+- more polished panel separation
+- no muddy cramped blocks
+- no ugly letter spacing
+- no washed-out microtext
+
+Style target:
+black / steel / restrained green
+premium tactical software
+clean but serious
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — SPLINTER CELL ACCENT SYSTEM
+━━━━━━━━━━━━━━━━━━
+
+Rework the color system so it feels more intentional.
+
+Use:
+- black / near-black backgrounds
+- dark gray panel layers
+- muted steel borders
+- restrained green accents for:
+  - active buttons
+  - selected theater
+  - posture highlights
+  - bars
+  - section emphasis
+- use white / gray text for readability
+- no overuse of green
+
+Green should feel:
+precise
+controlled
+tactical
+
+not neon soup
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — TYPOGRAPHY + SPACING PASS
+━━━━━━━━━━━━━━━━━━
+
+Fix all typography and spacing.
+
+Improve:
+- heading sizes
+- section label spacing
+- line-height
+- card padding
+- table spacing
+- action button wrapping
+- current status readability
+- detail panel readability
+- bar label alignment
+
+Eliminate:
+- weird letter spacing
+- compressed headings
+- crowded blocks
+- overly tiny metadata text
+- clunky spacing around labels and values
+
+Make the page easier to scan in under 5 seconds.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — PDF / PRINT REPORT REDESIGN
+━━━━━━━━━━━━━━━━━━
+
+The report output must be redesigned into a real printable intelligence brief.
+
+Current issue:
+the dark report style is not printer-friendly and looks jammed.
+
+REBUILD THE PDF / PRINT DESIGN with these rules:
+
+- white background
+- black / dark gray text
+- green only as subtle accent lines or section markers
+- no dark page background
+- no terminal full-black export
+- balanced margins
+- proper section spacing
+- readable line-height
+- clean title block
+- clear header hierarchy
+- bars aligned properly
+- labels not overlapping bars
+- values aligned correctly
+- multi-page safe if content exceeds one page
+
+Required PDF structure:
+1. Title block
+2. Theater / codename / timestamp
+3. Executive summary strip
+4. Current status
+5. Executive overview
+6. Force ledger
+7. Priority indicators
+8. Source stack
+9. Operational stress chart block
+10. Relative attrition chart block
+
+Important:
+- if page 1 gets crowded, continue to page 2
+- do not cram charts into bad positions
+- no overlapping labels
+- no jammed bars at the bottom
+- charts should look deliberate and printable
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — BAR / CHART REFINEMENT
+━━━━━━━━━━━━━━━━━━
+
+Refine all bar modules.
+
+Requirements:
+- clear labels
+- clear values
+- even vertical spacing
+- no jammed text
+- no overlapping labels
+- strong alignment
+- consistent bar thickness
+- readable in UI
+- readable in PDF
+- readable in print
+
+For PDF specifically:
+- bars should use a light neutral base
+- green fill accent
+- dark labels
+- right-aligned numeric values
+- enough spacing between groups
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — ACTION / BUTTON POLISH
+━━━━━━━━━━━━━━━━━━
+
+Keep all current actions working, but make them cleaner and stronger visually.
+
+Validate and preserve:
+- Live Refresh
+- Generate Report
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+- Clear Search
+
+Improve button UI:
+- better spacing
+- better grouping
+- stronger active/hover states
+- clearer emphasis hierarchy
+- no awkward wrapping
+
+Do not break behavior.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — REPORT MODAL POLISH
+━━━━━━━━━━━━━━━━━━
+
+Make the generated report modal feel premium and more readable.
+
+Improve:
+- section spacing
+- chart block spacing
+- top metadata strip
+- better content hierarchy
+- cleaner scroll behavior
+- more refined export button row
+
+Keep it dark in the modal if desired,
+but exported/printed report must still be light and print-friendly.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 8 — DEPLOYMENT HARDENING
+━━━━━━━━━━━━━━━━━━
+
+Make sure WARSTATE is actually ready to go live.
+
+Check:
+- build safety
+- runtime safety
+- no syntax errors
+- no broken imports
+- no broken lazy import
+- no dead action buttons
+- no export crashes
+- no state mismatch between selected theater and generated report
+
+Keep:
+- generated snapshot behavior
+- EdgeOne-safe lazy PDF import
+- fallback behavior for copy / print problems
+
+━━━━━━━━━━━━━━━━━━
+PHASE 9 — FINAL VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After the overhaul:
+- run full build
+- confirm no errors
+- confirm app loads cleanly
+- confirm all buttons function
+- confirm generated report snapshot still works
+- confirm PDF output is printable and clean
+- confirm bar sections are aligned and readable
+- confirm UI feels significantly more polished
+
+━━━━━━━━━━━━━━━━━━
+RETURN FORMAT
+━━━━━━━━━━━━━━━━━━
+
+Return exactly:
+
+1. Visual changes made
+2. PDF/print changes made
+3. Bar/chart fixes made
+4. Functionality validated
+5. Any remaining issues
+6. Whether WARSTATE is ready to go live
+
+IMPORTANT:
+Do the work in code.
+Do not just describe it.
+Implement the overhaul and validate it.
