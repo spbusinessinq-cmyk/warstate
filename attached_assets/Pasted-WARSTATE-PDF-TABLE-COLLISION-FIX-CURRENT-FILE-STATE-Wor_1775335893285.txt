@@ -1,0 +1,138 @@
+WARSTATE — PDF TABLE COLLISION FIX (CURRENT FILE STATE)
+
+Work from the CURRENT WARSTATE file exactly as it exists now.
+Do not redesign the app.
+Do not remove working actions.
+Do not break report snapshot logic.
+Do not revert UI work.
+
+PRIMARY GOAL:
+Fix the exported PDF/report layout so long values NEVER collide, overflow, or visually merge across columns.
+
+The live UI is acceptable for now.
+The urgent issue is the PDF/report table and section flow.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — FORCE LEDGER PDF TABLE REBUILD
+━━━━━━━━━━━━━━━━━━
+
+The current FORCE LEDGER in the exported PDF is still too cramped.
+Long strings in the second and third columns are visually colliding and wrapping badly.
+
+Rebuild the PDF ledger as a true wrapped table system.
+
+Requirements:
+1. Use fixed column widths.
+2. Wrap text separately inside each column.
+3. Calculate row height dynamically from the tallest wrapped cell in that row.
+4. Vertically align text to the top of each row.
+5. Add enough cell padding.
+6. Draw each row only after height is calculated.
+7. Ensure each row clears fully before the next row begins.
+8. No text may cross into adjacent columns.
+9. No text may extend past the right printable margin.
+
+Recommended structure:
+- Column 1: metric
+- Column 2: friendly / alignment
+- Column 3: opposing / network
+- Optional column 4 only if it still fits cleanly
+- If 4 columns remain too cramped, remove the “type” column from the PDF export only and keep it in the live UI
+
+Important:
+If needed, simplify the PDF ledger structure for readability.
+PDF readability matters more than mirroring the live UI exactly.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — REUSABLE PDF LAYOUT HELPERS
+━━━━━━━━━━━━━━━━━━
+
+Create proper PDF layout helpers instead of manual text dumping.
+
+Implement reusable helpers for:
+- page break check
+- wrapped text block rendering
+- section title rendering
+- metadata row rendering
+- wrapped table row rendering
+- bar/chart section rendering
+
+The PDF generator should behave like a structured document builder.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — PAGE BREAK HARDENING
+━━━━━━━━━━━━━━━━━━
+
+Fix page flow so content never runs into the footer or next section.
+
+Requirements:
+- before rendering any section, check if there is enough remaining vertical space
+- if not, add a new page
+- repeat header style cleanly on new pages where useful
+- prevent charts, source stack, or indicators from being split awkwardly
+- ensure force ledger can continue to page 2 cleanly if needed
+
+If necessary:
+- move part of the ledger to page 2
+- move relative attrition to a separate page block
+- do not cram
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — PDF READABILITY POLISH
+━━━━━━━━━━━━━━━━━━
+
+Keep the current lighter printable report style, but improve clarity.
+
+Refine:
+- table header spacing
+- row padding
+- line-height
+- section spacing
+- margins
+- label weight
+- bar group spacing
+- footer spacing
+
+Target:
+clean printable intelligence memo
+not cramped debug export
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — KEEP CURRENT APP FEATURES WORKING
+━━━━━━━━━━━━━━━━━━
+
+Do not break:
+- Live Refresh
+- Generate Report
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+- Clear Search
+
+Keep the generated report snapshot logic intact:
+all exports must still use the locked generated report snapshot when one exists
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — FINAL VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After fixes:
+1. run full build
+2. confirm no syntax errors
+3. confirm no runtime errors
+4. confirm Export PDF still works
+5. confirm no column collision in Force Ledger
+6. confirm no text crosses margins
+7. confirm long values wrap cleanly
+8. confirm section/page flow is clean
+9. confirm WARSTATE remains launch-ready
+
+RETURN EXACTLY:
+1. PDF layout issues found
+2. Force ledger fixes made
+3. Page-break/layout fixes made
+4. Any PDF structure changes made
+5. Functionality validated
+6. Whether the report collision issue is fully fixed

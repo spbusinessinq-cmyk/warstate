@@ -274,8 +274,9 @@ export function openPrintWindow(title: string, reportText: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// PDF report renderer — rebuilt with proper layout engine
-// Uses dynamic row heights, column-constrained wrapping, clean page breaks
+// PDF report renderer — structured layout engine with collision-proof ledger
+// Force Ledger uses 2-section block format (no side-by-side columns for
+// variable-length string values — eliminates all text overflow and collision)
 // ---------------------------------------------------------------------------
 export function renderPDFReport(doc: any, source: ReportSnapshot): void {
   // Page constants
@@ -288,13 +289,11 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
   const CW = PW - ML - MR;   // content width = 512
   const BOTTOM = PH - MB;    // max y before footer zone = 736
 
-  // Column widths for 3-col ledger table
-  const C0W = 162;            // metric label column
-  const C1W = Math.floor((CW - C0W) / 2);  // friendly column
-  const C2W = CW - C0W - C1W;              // opposing column
-  const C0X = ML;
-  const C1X = ML + C0W;
-  const C2X = ML + C0W + C1W;
+  // 2-col key-value layout for Force Ledger
+  const KV_LW = 158;          // label column width
+  const KV_VW = CW - KV_LW;  // value column width = ~354pt
+  const KV_LX = ML;
+  const KV_VX = ML + KV_LW;
 
   // Colors (r,g,b)
   const COL_DARK   = [26, 31, 35] as [number,number,number];
@@ -403,77 +402,71 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
     if (gapV) y += gapV;
   }
 
-  // ── Force Ledger Table Helper ─────────────────────────────────────────────
-  // Renders a single ledger row with proper wrapped columns and dynamic height.
-  function ledgerRow(
-    col0: string, col1: string, col2: string,
-    isHeader: boolean, isShaded: boolean
-  ) {
-    const VPAD = 6;   // vertical padding top/bottom
-    const HPAD = 6;   // horizontal padding inside cell
+  // ── Force Ledger: 2-column key-value row ──────────────────────────────────
+  // Label column (fixed KV_LW) | Value column (flexible KV_VW).
+  // Value column is ~354pt — long strings wrap freely, zero collision possible.
+  function kvRow(label: string, value: string, isShaded: boolean) {
+    const VPAD = 5;
+    const HPAD = 8;
 
-    // Set font sizes for line-count calculation
-    const fSize = isHeader ? 7.5 : 8.5;
-    doc.setFontSize(fSize);
-    doc.setFont("courier", isHeader ? "bold" : "normal");
+    doc.setFont("courier", "normal");
+    doc.setFontSize(8.5);
 
-    // Wrap each column's text
-    const c0Lines = wrappedLines(col0, C0W - HPAD * 2);
-    const c1Lines = wrappedLines(col1, C1W - HPAD * 2);
-    const c2Lines = wrappedLines(col2, C2W - HPAD * 2);
-    const maxLines = Math.max(c0Lines.length, c1Lines.length, c2Lines.length, 1);
-    const lineH = isHeader ? 11 : 12;
+    // Wrap independently — label col is narrow, value col is wide
+    const labelLines = wrappedLines(label, KV_LW - HPAD * 2);
+    const valueLines = wrappedLines(value, KV_VW - HPAD * 2);
+    const maxLines = Math.max(labelLines.length, valueLines.length, 1);
+    const lineH = 12;
     const rowH = maxLines * lineH + VPAD * 2;
 
-    checkPage(rowH + 2);
+    checkPage(rowH + 4);
 
     // Row background
     if (isShaded) {
       doc.setFillColor(...COL_FILL_A);
       doc.rect(ML, y, CW, rowH, "F");
-    } else if (!isHeader) {
-      doc.setFillColor(...COL_FILL_B);
-      doc.rect(ML, y, CW, rowH, "F");
     }
 
-    // Column dividers
+    // Row top border + vertical divider between columns
     doc.setDrawColor(...COL_RULE);
     doc.setLineWidth(0.3);
     doc.line(ML, y, ML + CW, y);
-    if (isHeader) {
-      doc.line(ML, y + rowH, ML + CW, y + rowH);
-    }
-    doc.line(C1X, y, C1X, y + rowH);
-    doc.line(C2X, y, C2X, y + rowH);
+    doc.line(KV_VX, y, KV_VX, y + rowH);
 
-    const textY = y + VPAD + (isHeader ? 8 : 9);
+    const textY = y + VPAD + 9;  // baseline of first line
 
-    // col0
-    const c0Color = isHeader ? COL_MUTED : COL_DARK;
-    doc.setFont("courier", isHeader ? "bold" : "normal");
-    doc.setFontSize(fSize);
-    doc.setTextColor(...c0Color);
-    c0Lines.forEach((line: string, li: number) => {
-      doc.text(line, C0X + HPAD, textY + li * lineH);
+    // Label — bold, muted color (metric name)
+    doc.setFont("courier", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...COL_MUTED);
+    labelLines.forEach((line: string, li: number) => {
+      doc.text(line, KV_LX + HPAD, textY + li * lineH);
     });
 
-    // col1
-    const c1Color = isHeader ? COL_MUTED : COL_DARK;
-    doc.setFont("courier", isHeader ? "bold" : "normal");
-    doc.setTextColor(...c1Color);
-    c1Lines.forEach((line: string, li: number) => {
-      doc.text(line, C1X + HPAD, textY + li * lineH);
-    });
-
-    // col2
-    const c2Color = isHeader ? COL_MUTED : COL_DARK;
-    doc.setFont("courier", isHeader ? "bold" : "normal");
-    doc.setTextColor(...c2Color);
-    c2Lines.forEach((line: string, li: number) => {
-      doc.text(line, C2X + HPAD, textY + li * lineH);
+    // Value — normal, dark color (data value — wraps freely in wide column)
+    doc.setFont("courier", "normal");
+    doc.setTextColor(...COL_DARK);
+    valueLines.forEach((line: string, li: number) => {
+      doc.text(line, KV_VX + HPAD, textY + li * lineH);
     });
 
     y += rowH;
+  }
+
+  // Force block sub-header (friendly / opposing section divider)
+  function forceBlockHeader(label: string) {
+    checkPage(30);
+    doc.setFillColor(...COL_FILL_A);
+    doc.rect(ML, y, CW, 22, "F");
+    doc.setDrawColor(...COL_RULE);
+    doc.setLineWidth(0.4);
+    doc.line(ML, y, ML + CW, y);
+    doc.line(ML, y + 22, ML + CW, y + 22);
+    doc.setFont("courier", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...COL_GREEN);
+    doc.text(label, ML + 8, y + 14);
+    y += 22;
   }
 
   // ── Bar chart helper ───────────────────────────────────────────────────────
@@ -589,33 +582,38 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
   });
 
   // ── 5. Force Ledger ───────────────────────────────────────────────────────
+  // 2-section block format: Friendly block then Opposing block.
+  // Each block uses 2-col key-value rows: metric label | value.
+  // Value column is ~354pt wide — all strings wrap freely, zero collision.
   sectionHeader("5.  Force Ledger");
 
-  // Ledger table header
-  ledgerRow(
-    "METRIC",
-    source.theater.friendly.label.toUpperCase(),
-    source.theater.opposing.label.toUpperCase(),
-    true, false
-  );
+  // FRIENDLY FORCES BLOCK
+  forceBlockHeader(`FRIENDLY FORCES — ${source.theater.friendly.label.toUpperCase()}`);
+  kvRow("Equipment Losses",    formatNumber(source.theater.friendly.equipmentLosses), true);
+  kvRow("Tank Losses",         formatNumber(source.theater.friendly.tankLosses),      false);
+  kvRow("Armored Veh. Losses", formatNumber(source.theater.friendly.armoredLosses),   true);
+  kvRow("Casualties (Est.)",   source.theater.friendly.casualties,                    false);
+  kvRow("KIA (Est.)",          source.theater.friendly.killed,                        true);
 
-  // Ledger rows
-  const ledgerRows: [string, string, string][] = [
-    ["Total Equipment Losses", formatNumber(source.theater.friendly.equipmentLosses), formatNumber(source.theater.opposing.equipmentLosses)],
-    ["Tank Losses",            formatNumber(source.theater.friendly.tankLosses),       formatNumber(source.theater.opposing.tankLosses)],
-    ["Armored Vehicle Losses", formatNumber(source.theater.friendly.armoredLosses),    formatNumber(source.theater.opposing.armoredLosses)],
-    ["Casualties (Est.)",      source.theater.friendly.casualties,                     source.theater.opposing.casualties],
-    ["KIA (Est.)",             source.theater.friendly.killed,                         source.theater.opposing.killed],
-  ];
-  ledgerRows.forEach((row, ri) => {
-    ledgerRow(row[0], row[1], row[2], false, ri % 2 === 0);
-  });
-
-  // Bottom ledger rule
+  // Close friendly block with bottom border
   doc.setDrawColor(...COL_RULE);
   doc.setLineWidth(0.4);
   doc.line(ML, y, ML + CW, y);
-  y += 6;
+  y += 14;
+
+  // OPPOSING FORCES BLOCK
+  forceBlockHeader(`OPPOSING FORCES — ${source.theater.opposing.label.toUpperCase()}`);
+  kvRow("Equipment Losses",    formatNumber(source.theater.opposing.equipmentLosses), true);
+  kvRow("Tank Losses",         formatNumber(source.theater.opposing.tankLosses),      false);
+  kvRow("Armored Veh. Losses", formatNumber(source.theater.opposing.armoredLosses),   true);
+  kvRow("Casualties (Est.)",   source.theater.opposing.casualties,                    false);
+  kvRow("KIA (Est.)",          source.theater.opposing.killed,                        true);
+
+  // Close opposing block with bottom border
+  doc.setDrawColor(...COL_RULE);
+  doc.setLineWidth(0.4);
+  doc.line(ML, y, ML + CW, y);
+  y += 8;
 
   // ── 6. Priority Indicators ────────────────────────────────────────────────
   sectionHeader("6.  Priority Indicators");
