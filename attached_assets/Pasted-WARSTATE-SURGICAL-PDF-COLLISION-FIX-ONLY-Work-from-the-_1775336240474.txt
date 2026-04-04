@@ -1,0 +1,88 @@
+WARSTATE — SURGICAL PDF COLLISION FIX ONLY
+
+Work from the CURRENT file exactly as it exists right now.
+Do not redesign the UI.
+Do not touch the live interface styling.
+Do not change theater data.
+Do not change button behavior unless required for the PDF fix.
+Do not do a broad refactor.
+
+ONLY fix the exported PDF/report layout collision problem.
+
+CURRENT PROBLEM:
+Long wrapped text in the exported report is still colliding in table/section layout.
+This is happening in the printable/exported report flow, not the live UI.
+The PDF/report needs a true layout fix, not another cosmetic spacing tweak.
+
+MISSION:
+Fix PDF/report text collisions so no text overlaps, merges, or runs into adjacent content.
+
+REQUIRED FIXES:
+
+1. FORCE LEDGER PDF TABLE
+- rebuild the exported Force Ledger as a real wrapped table
+- use fixed column widths
+- calculate wrapped text per cell
+- calculate row height from the tallest wrapped cell
+- apply top-aligned text inside each cell
+- add proper cell padding
+- advance Y position only after full row height is known
+- prevent any text from crossing into adjacent columns
+- prevent any text from exceeding the right printable margin
+
+2. REMOVE TYPE COLUMN FROM PDF IF NEEDED
+- if the table is still too cramped, remove the “Type” column from the PDF/exported report only
+- keep the live UI table unchanged
+- prioritize print readability over matching the live UI exactly
+
+3. PRIORITY INDICATORS / SOURCE STACK FLOW
+- make sure long indicator lines wrap cleanly inside the printable width
+- make sure numbered items do not run off the right side
+- indent wrapped lines cleanly under the item number
+- preserve spacing between items
+
+4. PAGE BREAK SAFETY
+- before rendering any section, check remaining space
+- if section will collide with footer or bottom margin, add a new page first
+- do not split a table row across pages
+- do not let section titles sit at the bottom with content on the next page
+- keep section starts clean
+
+5. PDF HELPERS
+Create or improve helper functions for:
+- wrapped text measurement
+- row height calculation
+- page break checks
+- section title rendering
+- wrapped numbered-list rendering
+- wrapped table row rendering
+
+6. DO NOT TOUCH
+- live UI redesign
+- color overhaul
+- theater registry styling
+- action panel layout
+- report snapshot logic
+- TXT / JSON / copy / print behavior
+unless absolutely required by the PDF fix
+
+SUCCESS CRITERIA:
+- no overlapping text anywhere in the PDF/exported report
+- no right-margin overflow
+- no merged ledger columns
+- no numbered indicator text running off page
+- clean section spacing
+- clean page breaks
+- PDF remains launch-ready
+
+AFTER FIX:
+- run full build
+- validate no syntax/runtime errors
+- validate Export PDF still works
+
+RETURN EXACTLY:
+1. PDF collision issues found
+2. Exact fixes made
+3. Whether Type column was kept or removed in PDF
+4. Whether page-break logic was improved
+5. Whether the collision issue is fully fixed

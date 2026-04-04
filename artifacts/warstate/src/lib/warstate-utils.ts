@@ -349,7 +349,11 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
     }
   }
 
-  // Numbered item with bold first line and wrapped continuation
+  // Numbered item with bold first line and wrapped continuation.
+  // IMPORTANT: font/size MUST be set before getTextWidth and splitTextToSize.
+  // The previous operation may have left a different font active (e.g. 7.5pt
+  // from sectionHeader). Measuring at 7.5pt then rendering at 8.5pt bold
+  // causes ~77pt right-margin overflow on long lines.
   function numberedItem(idx: number, text: string, {
     indent = 12 as number,
     size = 8.5 as number,
@@ -357,12 +361,19 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
     gap = 4 as number,
   } = {}) {
     const prefix = `${idx + 1}.`;
-    const prefixW = doc.getTextWidth(prefix) + 6;
+
+    // Set to bold + correct size FIRST — bold is the widest variant so wrapping
+    // measured here will never exceed the render width on any subsequent line.
+    doc.setFont("courier", "bold");
+    doc.setFontSize(size);
+
+    const prefixW = doc.getTextWidth(prefix) + 6;        // measured at correct size
     const textColW = CW - indent - prefixW;
-    const lines = wrappedLines(text, textColW);
+    const lines = wrappedLines(text, textColW);            // split at correct size
     const totalH = lines.length * lineH + gap;
     checkPage(totalH);
 
+    // Draw prefix in muted normal weight
     doc.setFont("courier", "normal");
     doc.setFontSize(size);
     doc.setTextColor(...COL_MUTED);
