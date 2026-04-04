@@ -1,0 +1,326 @@
+WARSTATE — FINAL UI OVERHAUL + INTELLIGENCE DEPTH PASS
+
+Do not scrap the app.
+Do not break working exports.
+Do not remove the current report snapshot system.
+Keep WARSTATE as one unified battlefield intelligence product.
+
+The current build is still not acceptable visually.
+The green-heavy look is ugly.
+The UI feels thin, awkward, and low-authority.
+The conflict content is still too shallow.
+Fix both.
+
+MISSION:
+Turn WARSTATE into a sharper, darker, CIA-style internal intelligence system with:
+- black / graphite core
+- steel / slate structure
+- restrained green accents only where needed
+- better hierarchy
+- stronger depth
+- cleaner spacing
+- more serious typography
+- better intelligence writing
+- stronger source structure
+- better conflict summaries
+- better report output
+
+DO THE WORK IN CODE.
+Do not just describe the work.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — FULL VISUAL OVERHAUL
+━━━━━━━━━━━━━━━━━━
+
+The current visual system is wrong.
+Overhaul the UI.
+
+MANDATES:
+- black main foundation
+- charcoal / graphite panel layers
+- steel / slate borders
+- muted off-white text
+- restrained tactical green only for:
+  - active state
+  - selected theater
+  - posture emphasis
+  - bar fills
+  - high-priority accents
+
+REMOVE:
+- ugly olive vibe
+- over-green UI
+- weak washed-out panel tone
+- awkward thin styling
+- cheap dashboard feel
+
+TARGET LOOK:
+- CIA / internal analysis software
+- premium tactical system
+- sharp and cold
+- serious
+- not flashy
+- not neon
+- not generic SaaS
+- not terminal cosplay
+
+Improve:
+- header
+- conflict registry
+- action panel
+- current status card
+- detail panels
+- report modal
+- button styling
+- panel depth
+- spacing rhythm
+- visual grouping
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — LAYOUT REBALANCE
+━━━━━━━━━━━━━━━━━━
+
+The page composition still feels awkward.
+
+Fix layout balance:
+- top section should feel strong and deliberate
+- registry and actions should feel like paired command modules
+- lower half should feel like a real analysis workspace
+- current status should feel more authoritative
+- detail panel should feel like a modular intelligence console
+- spacing between major sections should be improved
+- reduce the feeling of empty awkward dead zones
+- improve width usage and card proportions
+
+Make the screen feel like a product, not a rough arrangement of boxes.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — TYPOGRAPHY + HIERARCHY
+━━━━━━━━━━━━━━━━━━
+
+Typography still needs major improvement.
+
+Fix:
+- heading hierarchy
+- label readability
+- metadata styling
+- line-height
+- spacing around paragraphs
+- table readability
+- button label clarity
+- letter spacing
+
+Reduce:
+- ugly microtext
+- weak contrast
+- weird tracking
+- clunky spacing
+- overly cramped content
+
+Target:
+clean scan hierarchy in under 5 seconds
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — DETAIL PANEL REDESIGN
+━━━━━━━━━━━━━━━━━━
+
+The detail panels are too plain.
+
+Overhaul:
+- Overview
+- Ledger
+- Indicators
+- Stress
+- Sources
+
+They should feel like:
+real intelligence work modules
+
+Not:
+generic tab boxes
+
+Improve:
+- panel header design
+- active tab styling
+- internal structure
+- spacing
+- visual weight
+- readability
+- module hierarchy
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — INTELLIGENCE DEPTH UPGRADE
+━━━━━━━━━━━━━━━━━━
+
+The conflict content is still too shallow.
+Make it more substantial and useful.
+
+For every theater:
+1. rewrite CURRENT STATUS to be more specific
+2. expand EXECUTIVE OVERVIEW into a more serious analyst summary
+3. improve PRIORITY INDICATORS so they are more operationally useful
+4. improve SOURCE STACK structure and specificity
+5. make SECTOR/STRESS feel more theater-specific
+6. make FORCE LEDGER smarter where exact numeric truth is limited
+
+DO NOT just repeat “mixed reporting” in lazy ways.
+Use better structured language.
+
+Each theater should feel like a real compiled operational card.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — SOURCE STRUCTURE REBUILD
+━━━━━━━━━━━━━━━━━━
+
+Current source handling is too weak.
+
+Rebuild source structure into clearer categories such as:
+- Official / State
+- Wire / Global Press
+- Conflict Monitor / Tracker
+- Military / Strike Reporting
+- Humanitarian / Displacement
+- Maritime / Infrastructure / Logistics
+- Regional / Local Reporting
+- Warning / Indicator Model
+
+Reflect this better in:
+- live UI
+- generated report
+- PDF / print output
+
+Make source structure feel credible and expandable.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — REPORT MODAL OVERHAUL
+━━━━━━━━━━━━━━━━━━
+
+The report modal needs to feel premium and locked-in.
+
+Improve:
+- spacing
+- chart placement
+- metadata strip
+- section hierarchy
+- export button row
+- visual authority
+- readability
+
+Keep it dark if that works visually,
+but make it feel like an internal locked report preview.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 8 — PDF / PRINT REPORT REFINEMENT
+━━━━━━━━━━━━━━━━━━
+
+The PDF is better, but still needs refinement.
+
+Keep it printer-friendly:
+- white background
+- black / dark gray text
+- green only as restrained accent
+- no dark full-page background
+- no cramped bottom chart area
+- no weak alignment
+- no awkward spacing
+
+Refine:
+- title block
+- metadata strip
+- section spacing
+- table row alignment
+- chart labels
+- chart spacing
+- bar block composition
+- page flow
+
+If needed:
+- move some sections to page 2
+- separate stress and relative attrition more cleanly
+- improve table alignment and chart spacing
+- make it look like an actual internal memo
+
+━━━━━━━━━━━━━━━━━━
+PHASE 9 — BAR / CHART REFINEMENT
+━━━━━━━━━━━━━━━━━━
+
+The bars need stronger design and alignment.
+
+Fix:
+- label alignment
+- value alignment
+- vertical spacing
+- group spacing
+- bar thickness consistency
+- PDF readability
+- UI readability
+
+Bars should feel like:
+real analytical chart modules
+
+not crude progress bars
+
+━━━━━━━━━━━━━━━━━━
+PHASE 10 — BUTTON + FUNCTION VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+Do not break current behavior.
+
+Validate and keep working:
+- Live Refresh
+- Generate Report
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+- Clear Search
+
+If anything is brittle, fix it.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 11 — LIVE-READY PRODUCT STRUCTURE
+━━━━━━━━━━━━━━━━━━
+
+Without fully building live ingestion yet,
+make the product structure look ready for it.
+
+Strengthen the app’s live-readiness with better placement for:
+- update timestamp
+- status confidence
+- source posture
+- escalation posture
+- watch indicators
+- report lock/snapshot state
+
+Do not add fake feeds.
+Do not mock nonsense.
+Just make the system structure stronger.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 12 — FINAL VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After all changes:
+- run full build
+- confirm no syntax/runtime errors
+- confirm page loads cleanly
+- confirm all actions still work
+- confirm report snapshot still works
+- confirm PDF still exports
+- confirm UI is significantly more polished
+- confirm content depth is meaningfully improved
+
+RETURN EXACTLY:
+1. Visual changes made
+2. Intelligence/content changes made
+3. Source structure changes made
+4. Report/PDF changes made
+5. Functionality validated
+6. Any remaining issues
+7. Whether WARSTATE is ready to go live
+
+IMPORTANT:
+Do the work.
+Implement the overhaul.
+No descriptions without code changes.

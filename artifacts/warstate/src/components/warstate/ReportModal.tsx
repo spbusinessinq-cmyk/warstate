@@ -10,6 +10,23 @@ interface ReportModalProps {
   onCopyBrief: () => void;
 }
 
+const parseCategory = (str: string, maxLen = 55) => {
+  const ci = str.indexOf(":");
+  const has = ci > 0 && ci < maxLen;
+  return {
+    category: has ? str.slice(0, ci).trim() : null,
+    detail: has ? str.slice(ci + 1).trim() : str,
+  };
+};
+
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+  <div className="text-[8px] uppercase tracking-[0.36em] text-[#4e6472] mb-3">{children}</div>
+);
+
+const SectionDivider = () => (
+  <div className="border-t border-[#121e28]" />
+);
+
 export function ReportModal({
   report,
   exportingPdf,
@@ -20,137 +37,173 @@ export function ReportModal({
   onCopyBrief,
 }: ReportModalProps) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 p-4 md:p-8 flex items-center justify-center font-mono">
-      <div className="w-full max-w-5xl border border-[#1a2830] bg-[#070a0e] shadow-[0_28px_80px_rgba(0,0,0,0.85)] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/92 p-3 md:p-6 flex items-start justify-center font-mono overflow-y-auto">
+      <div className="w-full max-w-5xl border border-[#1e2d38] bg-[#06090c] shadow-[0_40px_120px_rgba(0,0,0,0.9)] my-4">
 
         {/* ── Modal header ── */}
-        <div className="flex items-start justify-between gap-4 border-b border-[#111c24] px-6 md:px-7 py-5">
+        <div className="border-b border-[#121e28] bg-[#050810] px-6 md:px-8 py-5 flex items-start justify-between gap-4">
           <div>
-            <div className="text-[9px] uppercase tracking-[0.32em] text-[#2e5c48] mb-3">
+            <div className="text-[8px] uppercase tracking-[0.4em] text-[#3a4e5a] mb-3 flex items-center gap-2">
+              <span className="inline-block w-1.5 h-1.5 bg-[#265c42]" />
               Generated Report &nbsp;//&nbsp; Locked Snapshot
             </div>
-            <h3 className="text-2xl text-[#eef2f4] font-semibold">{report.theater.title}</h3>
-            <div className="text-[10px] text-[#52666e] uppercase tracking-[0.2em] mt-1">
-              {report.theater.codename} &nbsp;//&nbsp; {report.runtime.lastUpdated}
+            <h3 className="text-2xl text-[#e2eaee] font-bold tracking-tight">{report.theater.title}</h3>
+            <div className="text-[10px] text-[#4e6472] uppercase tracking-[0.24em] mt-1.5">
+              {report.theater.codename} &nbsp;//&nbsp; {report.runtime.posture} &nbsp;//&nbsp; {report.runtime.lastUpdated}
             </div>
           </div>
           <button
             onClick={onClose}
-            className="mt-1 px-4 py-2 border border-[#1a2830] bg-[#060a0d] text-[10px] uppercase tracking-[0.22em] text-[#52666e] hover:border-[#1e3d2e] hover:text-[#8a9eaa] transition-colors"
+            className="shrink-0 mt-1 px-4 py-2.5 border border-[#1e2d38] bg-[#050810] text-[9px] uppercase tracking-[0.24em] text-[#4e6472] hover:border-[#25364a] hover:text-[#7a8e9a] transition-colors"
           >
             Close
           </button>
         </div>
 
         {/* ── Scrollable body ── */}
-        <div className="p-6 md:p-7 space-y-7 max-h-[80vh] overflow-y-auto">
+        <div className="p-6 md:p-8 space-y-7 max-h-[82vh] overflow-y-auto">
 
-          {/* Summary strip */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#111c24] border border-[#1a2830]">
-            <div className="bg-[#060a0d] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Theater</div>
-              <div className="text-sm text-[#c4d0d8]">{report.theater.short}</div>
+          {/* Metadata strip */}
+          <div className="border border-[#1e2d38] grid grid-cols-2 md:grid-cols-4 divide-x divide-y divide-[#1e2d38]">
+            <div className="bg-[#050810] px-4 py-4">
+              <div className="text-[8px] uppercase tracking-[0.3em] text-[#4e6472] mb-1.5">Theater</div>
+              <div className="text-[12px] text-[#c8d6de] font-semibold">{report.theater.short}</div>
             </div>
-            <div className="bg-[#060a0d] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Posture</div>
-              <div className="text-sm text-[#4caf87]">{report.runtime.posture}</div>
+            <div className="bg-[#050810] px-4 py-4">
+              <div className="text-[8px] uppercase tracking-[0.3em] text-[#4e6472] mb-1.5">Posture</div>
+              <div className="text-[12px] text-[#5ec998] font-semibold">{report.runtime.posture}</div>
             </div>
-            <div className="bg-[#060a0d] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Confidence</div>
-              <div className="text-sm text-[#c4d0d8]">{report.runtime.confidence}</div>
+            <div className="bg-[#050810] px-4 py-4">
+              <div className="text-[8px] uppercase tracking-[0.3em] text-[#4e6472] mb-1.5">Confidence</div>
+              <div className="text-[12px] text-[#c8d6de]">{report.runtime.confidence}</div>
             </div>
-            <div className="bg-[#060a0d] px-4 py-4">
-              <div className="text-[9px] uppercase tracking-[0.26em] text-[#52666e] mb-2">Classification</div>
-              <div className="text-sm text-[#c4d0d8]">{report.theater.classification}</div>
+            <div className="bg-[#050810] px-4 py-4">
+              <div className="text-[8px] uppercase tracking-[0.3em] text-[#4e6472] mb-1.5">Classification</div>
+              <div className="text-[11px] text-[#617888]">{report.theater.classification}</div>
             </div>
           </div>
+
+          <SectionDivider />
 
           {/* Current Status */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Current Status</div>
-            <p className="text-sm leading-7 text-[#8a9eaa]">{report.runtime.currentStatus}</p>
+            <SectionLabel>Current Status</SectionLabel>
+            <div className="border-l-2 border-[#1e2d38] pl-4">
+              <p className="text-[13px] leading-7 text-[#9aaebb]">{report.runtime.currentStatus}</p>
+            </div>
           </div>
 
-          {/* Bar charts — side by side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Sector stress */}
-            <div className="space-y-4">
-              <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Sector Stress Index</div>
-              {report.runtime.sectors.map((sector) => (
-                <div key={sector.name}>
-                  <div className="flex justify-between text-[11px] text-[#8a9eaa] mb-2 uppercase tracking-[0.14em]">
-                    <span>{sector.name}</span>
-                    <span className="tabular-nums text-[#52666e]">{sector.value}</span>
+          <SectionDivider />
+
+          {/* Executive Overview */}
+          <div>
+            <SectionLabel>Executive Overview</SectionLabel>
+            <p className="text-[13px] leading-7 text-[#7a8e9a]">{report.theater.overview}</p>
+          </div>
+
+          {/* Escalation Drivers */}
+          <div>
+            <SectionLabel>Escalation Drivers</SectionLabel>
+            <div className="space-y-2">
+              {report.theater.escalationDrivers.map((driver, idx) => {
+                const { category, detail } = parseCategory(driver, 60);
+                return (
+                  <div key={idx} className="flex gap-4 border border-[#1e2d38] bg-[#050810] px-4 py-3">
+                    <div className="text-[9px] font-bold text-[#374650] tabular-nums select-none mt-0.5 shrink-0 w-5">
+                      {String(idx + 1).padStart(2, "0")}
+                    </div>
+                    <div>
+                      {category && (
+                        <div className="text-[8px] uppercase tracking-[0.24em] text-[#617888] mb-1">{category}</div>
+                      )}
+                      <div className="text-[13px] leading-6 text-[#7a8e9a]">{detail}</div>
+                    </div>
                   </div>
-                  <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
-                    <div
-                      className="h-full bg-[#1c6348]"
-                      style={{ width: `${sector.value}%` }}
-                    />
+                );
+              })}
+            </div>
+          </div>
+
+          <SectionDivider />
+
+          {/* Bar charts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            {/* Sector Stress */}
+            <div>
+              <SectionLabel>Sector Stress Index</SectionLabel>
+              <div className="space-y-4">
+                {report.runtime.sectors.map((sector) => (
+                  <div key={sector.name}>
+                    <div className="flex justify-between items-baseline mb-1.5">
+                      <span className="text-[10px] text-[#7a8e9a] uppercase tracking-[0.16em]">{sector.name}</span>
+                      <span className="text-[11px] tabular-nums text-[#4e6472] font-bold">{sector.value}</span>
+                    </div>
+                    <div className="h-2 bg-[#050810] border border-[#1e2d38]">
+                      <div className="h-full bg-[#1c6348]" style={{ width: `${sector.value}%` }} />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Comparison bars */}
-            <div className="space-y-4">
-              <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Relative Attrition</div>
-              {report.trendBars.map((bar) => (
-                <div key={bar.label}>
-                  <div className="flex justify-between text-[11px] text-[#8a9eaa] mb-2 uppercase tracking-[0.14em]">
-                    <span>{bar.label}</span>
-                    <span className="tabular-nums text-[#52666e]">{bar.friendly} / {bar.opposing}</span>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
-                      <div className="h-full bg-[#1c6348]" style={{ width: `${bar.friendly}%` }} />
+            {/* Relative Attrition */}
+            <div>
+              <SectionLabel>Relative Attrition</SectionLabel>
+              <div className="space-y-4">
+                {report.trendBars.map((bar) => (
+                  <div key={bar.label}>
+                    <div className="flex justify-between items-baseline mb-1.5">
+                      <span className="text-[10px] text-[#7a8e9a] uppercase tracking-[0.16em]">{bar.label}</span>
+                      <span className="text-[10px] tabular-nums text-[#374650]">{bar.friendly} / {bar.opposing}</span>
                     </div>
-                    <div className="h-2.5 bg-[#0a1214] border border-[#1a2830]">
-                      <div className="h-full bg-[#374a56]" style={{ width: `${bar.opposing}%` }} />
+                    <div className="space-y-1">
+                      <div className="h-2 bg-[#050810] border border-[#1e2d38]">
+                        <div className="h-full bg-[#1c6348]" style={{ width: `${bar.friendly}%` }} />
+                      </div>
+                      <div className="h-2 bg-[#050810] border border-[#1e2d38]">
+                        <div className="h-full bg-[#374a56]" style={{ width: `${bar.opposing}%` }} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-              <div className="flex gap-5 text-[9px] uppercase tracking-[0.18em] text-[#364a56] pt-3 border-t border-[#111c24]">
+                ))}
+              </div>
+              <div className="flex gap-6 text-[8px] uppercase tracking-[0.2em] text-[#374650] mt-5 pt-4 border-t border-[#121e28]">
                 <span className="flex items-center gap-2">
-                  <span className="inline-block w-3 h-1.5 bg-[#1c6348]" />
+                  <span className="inline-block w-4 h-1.5 bg-[#1c6348]" />
                   {report.theater.friendly.label}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="inline-block w-3 h-1.5 bg-[#374a56]" />
+                  <span className="inline-block w-4 h-1.5 bg-[#374a56]" />
                   {report.theater.opposing.label}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Executive Overview */}
-          <div>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Executive Overview</div>
-            <p className="text-sm leading-7 text-[#8a9eaa]">{report.theater.overview}</p>
-          </div>
+          <SectionDivider />
 
           {/* Force Ledger */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Force Ledger</div>
-            <div className="border border-[#1a2830] overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-[#060a0d] border-b border-[#1a2830]">
+            <SectionLabel>Force Ledger</SectionLabel>
+            <div className="border border-[#1e2d38] overflow-hidden">
+              <table className="w-full text-[12px]">
+                <thead className="bg-[#050810] border-b border-[#1e2d38]">
                   <tr>
-                    <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">Metric</th>
-                    <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">{report.theater.friendly.label}</th>
-                    <th className="text-left px-4 py-3 text-[9px] uppercase tracking-[0.2em] text-[#52666e] font-medium">{report.theater.opposing.label}</th>
+                    <th className="text-left px-4 py-3 text-[8px] uppercase tracking-[0.24em] text-[#4e6472] font-medium">Metric</th>
+                    <th className="text-left px-4 py-3 text-[8px] uppercase tracking-[0.24em] text-[#4e6472] font-medium">{report.theater.friendly.label}</th>
+                    <th className="text-left px-4 py-3 text-[8px] uppercase tracking-[0.24em] text-[#4e6472] font-medium">{report.theater.opposing.label}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report.comparisonRows.map(([metric, friendly, opposing], idx) => (
                     <tr
                       key={metric}
-                      className={`border-b border-[#111c24] last:border-0 ${idx % 2 === 0 ? "bg-[#060a0d]" : "bg-[#080e0b]"}`}
+                      className={`border-b border-[#121e28] last:border-0 ${idx % 2 === 0 ? "bg-[#050810]" : "bg-[#080c10]"}`}
                     >
-                      <td className="px-4 py-3 text-[#c4d0d8]">{metric}</td>
-                      <td className="px-4 py-3 text-[#8a9eaa]">{friendly}</td>
-                      <td className="px-4 py-3 text-[#8a9eaa]">{opposing}</td>
+                      <td className="px-4 py-3 text-[#c8d6de]">{metric}</td>
+                      <td className="px-4 py-3 text-[#7a8e9a]">{friendly}</td>
+                      <td className="px-4 py-3 text-[#7a8e9a]">{opposing}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -158,66 +211,82 @@ export function ReportModal({
             </div>
           </div>
 
+          <SectionDivider />
+
           {/* Priority Indicators */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Priority Indicators</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {report.theater.indicators.map((item, idx) => (
-                <div
-                  key={item}
-                  className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
-                >
-                  <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
-                  {item}
-                </div>
-              ))}
+            <SectionLabel>Priority Indicators</SectionLabel>
+            <div className="space-y-2">
+              {report.theater.indicators.map((item, idx) => {
+                const { category, detail } = parseCategory(item);
+                return (
+                  <div key={idx} className="flex gap-4 border border-[#1e2d38] bg-[#050810] px-4 py-3">
+                    <div className="text-[9px] font-bold text-[#374650] tabular-nums select-none mt-0.5 shrink-0 w-5">
+                      {idx + 1}.
+                    </div>
+                    <div>
+                      {category && (
+                        <div className="text-[8px] uppercase tracking-[0.24em] text-[#617888] mb-1.5">{category}</div>
+                      )}
+                      <div className="text-[13px] leading-6 text-[#7a8e9a]">{detail}</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Source Stack */}
           <div>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Source Stack</div>
+            <div className="flex items-center gap-3 mb-3">
+              <SectionLabel>Source Stack</SectionLabel>
+              <div className="flex-1 border-t border-[#121e28]" />
+              <div className="text-[8px] uppercase tracking-[0.22em] text-[#374650] mb-3 tabular-nums">{report.theater.sources.length} cat.</div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {report.theater.sources.map((source, idx) => (
-                <div
-                  key={source}
-                  className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
-                >
-                  <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
-                  {source}
-                </div>
-              ))}
+              {report.theater.sources.map((src, idx) => {
+                const { category, detail } = parseCategory(src, 50);
+                return (
+                  <div key={idx} className="border border-[#1e2d38] bg-[#050810] px-4 py-3">
+                    {category && (
+                      <div className="text-[8px] uppercase tracking-[0.26em] text-[#617888] mb-1.5">{category}</div>
+                    )}
+                    <div className="text-[11px] leading-5 text-[#617888]">{detail}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Export actions */}
-          <div className="flex flex-wrap gap-2 pt-4 border-t border-[#111c24]">
+          <div className="flex flex-wrap gap-2 pt-5 border-t border-[#1e2d38]">
             <button
               disabled={exportingPdf}
               onClick={onExportPDF}
-              className="px-5 py-3 border border-[#265c42] bg-[#071812] text-[11px] uppercase tracking-[0.22em] text-[#5ec998] hover:bg-[#0a2018] disabled:opacity-50 transition-colors"
+              className="px-5 py-3 border border-[#265c42] bg-[#061018] text-[10px] uppercase tracking-[0.24em] text-[#5ec998] hover:bg-[#081420] hover:border-[#2f7050] disabled:opacity-40 transition-colors"
             >
               {exportingPdf ? "Exporting..." : "Export PDF"}
             </button>
             <button
               onClick={onExportTXT}
-              className="px-5 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.22em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
+              className="px-5 py-3 border border-[#1e2d38] bg-[#050810] text-[10px] uppercase tracking-[0.24em] text-[#7a8e9a] hover:border-[#25364a] hover:text-[#c8d6de] transition-colors"
             >
               Export TXT
             </button>
             <button
               onClick={onExportJSON}
-              className="px-5 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.22em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
+              className="px-5 py-3 border border-[#1e2d38] bg-[#050810] text-[10px] uppercase tracking-[0.24em] text-[#7a8e9a] hover:border-[#25364a] hover:text-[#c8d6de] transition-colors"
             >
               Export JSON
             </button>
             <button
               onClick={onCopyBrief}
-              className="px-5 py-3 border border-[#1a2830] bg-[#060a0d] text-[11px] uppercase tracking-[0.22em] text-[#8a9eaa] hover:border-[#1e3d2e] hover:text-[#c4d0d8] transition-colors"
+              className="px-5 py-3 border border-[#1e2d38] bg-[#050810] text-[10px] uppercase tracking-[0.24em] text-[#7a8e9a] hover:border-[#25364a] hover:text-[#c8d6de] transition-colors"
             >
               Copy Brief
             </button>
           </div>
+
         </div>
       </div>
     </div>
