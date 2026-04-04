@@ -1,0 +1,208 @@
+WARSTATE — FINAL DEPLOYMENT UNIFICATION PASS
+
+Work from the CURRENT WARSTATE file exactly as it exists now.
+Do not rebuild from scratch.
+Do not split the app into multiple disconnected systems.
+Do not remove working actions.
+Do not break the current report snapshot model.
+
+OBJECTIVE:
+Make WARSTATE fully deployment-ready as one unified live-site product.
+
+This is the final unification pass.
+The goal is:
+- one clean WARSTATE experience
+- one stable code path
+- one reliable export/report system
+- one polished deployable app
+- no loose ends
+
+Implement the fixes in code and validate them.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — UNIFY THE PRODUCT
+━━━━━━━━━━━━━━━━━━
+
+Make sure WARSTATE behaves as one coherent system.
+
+Requirements:
+- theater selection
+- current status
+- detail panels
+- report generation
+- export actions
+- modal preview
+- print/copy fallbacks
+
+All must feel like one product, not separate parts bolted together.
+
+Clean up:
+- duplicate logic
+- stale state edge cases
+- inconsistent naming
+- mismatched button behavior
+- any rough spots between live state and generated report state
+
+Keep the app simple and unified:
+Select theater → review status → generate report → export
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — FINAL CODE CLEANUP
+━━━━━━━━━━━━━━━━━━
+
+Run a final cleanup pass on the current file.
+
+Check and fix:
+- dead code
+- duplicated helpers
+- brittle state handling
+- bad layout assumptions
+- weak variable naming
+- overly repetitive JSX where easy cleanup helps
+- any syntax or runtime risks
+- any leftover preview-only junk that hurts deployment
+
+Do not over-engineer.
+Just make it clean and stable.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — DEPLOYMENT HARDENING
+━━━━━━━━━━━━━━━━━━
+
+Prepare specifically for live deployment.
+
+Validate:
+- no syntax errors
+- no runtime errors
+- no broken imports
+- lazy PDF import works
+- no browser-only API fires at render time
+- all actions happen only on user interaction
+- fallbacks exist where permissions may fail
+- no deploy blockers remain
+
+Make sure the page is safe for:
+- Replit deploy
+- EdgeOne-style deploy
+- real browser use
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — BUTTON TRUTH PASS
+━━━━━━━━━━━━━━━━━━
+
+Every button must do exactly what the label says.
+
+Validate and fix if needed:
+- Live Refresh
+- Generate Report
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+- Clear Search
+- Close report modal
+- Close manual copy modal
+
+Requirements:
+- no dead clicks
+- no silent failures
+- clear toast feedback
+- no broken disabled/loading states
+- no mismatch between visible state and exported state
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — REPORT SNAPSHOT INTEGRITY
+━━━━━━━━━━━━━━━━━━
+
+Lock down the generated report behavior.
+
+When Generate Report is pressed:
+- freeze selected theater
+- freeze timestamp
+- freeze posture
+- freeze confidence
+- freeze sector bars
+- freeze ledger values
+- freeze indicators
+- freeze source stack
+
+After that:
+- modal must use locked snapshot
+- PDF must use locked snapshot
+- TXT must use locked snapshot
+- JSON must use locked snapshot
+- Copy Brief must use locked snapshot
+- Print must use locked snapshot
+
+Changing theater later must not mutate the already-generated report.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — FINAL PDF / PRINT VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+Keep the current report system but verify it is truly launch-safe.
+
+Confirm:
+- PDF exports
+- no report collisions
+- no right-margin overflow
+- no overlapping text
+- page flow is clean
+- chart blocks render acceptably
+- print output is readable
+- report remains light-background and printable
+
+Do not redesign again unless required for stability.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — FINAL UI POLISH
+━━━━━━━━━━━━━━━━━━
+
+Do one restrained final polish pass.
+
+Improve only if needed:
+- spacing
+- alignment
+- button grouping
+- typography consistency
+- panel polish
+- card balance
+- modal spacing
+- registry readability
+
+Do not do another large redesign.
+This is just final tightening for launch.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 8 — BUILD + VALIDATE
+━━━━━━━━━━━━━━━━━━
+
+After all fixes:
+1. run full build
+2. confirm zero syntax errors
+3. confirm zero runtime errors
+4. confirm app loads cleanly
+5. confirm theater switching works
+6. confirm panels work
+7. confirm report generation works
+8. confirm all export actions work
+9. confirm copy fallback works
+10. confirm print works
+11. confirm PDF works
+12. confirm WARSTATE is stable enough for live deployment
+
+━━━━━━━━━━━━━━━━━━
+RETURN EXACTLY
+━━━━━━━━━━━━━━━━━━
+
+1. Final cleanup changes made
+2. Deployment hardening changes made
+3. Report/export validation results
+4. Any remaining blockers
+5. Whether WARSTATE is fully ready for live deployment
+
+IMPORTANT:
+Implement the fixes in code.
+Do not just describe them.
+Do the final deployment pass now.

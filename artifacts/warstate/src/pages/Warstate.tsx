@@ -9,6 +9,7 @@ import {
   copyToClipboard,
   openPrintWindow,
   renderPDFReport,
+  parseCategory,
   ReportSnapshot,
 } from "@/lib/warstate-utils";
 import { ReportModal } from "@/components/warstate/ReportModal";
@@ -188,16 +189,6 @@ export default function Warstate() {
     </button>
   );
 
-  // Parse "CATEGORY: detail" strings for category/detail rendering
-  const parseCategory = (str: string, maxLen = 55) => {
-    const ci = str.indexOf(":");
-    const has = ci > 0 && ci < maxLen;
-    return {
-      category: has ? str.slice(0, ci).trim() : null,
-      detail: has ? str.slice(ci + 1).trim() : str,
-    };
-  };
-
   return (
     <div className="min-h-screen bg-[#020304] text-[#c8d6de] p-3 md:p-5 font-mono">
       <div className="max-w-[1720px] mx-auto space-y-3">
@@ -373,7 +364,8 @@ export default function Warstate() {
                     </button>
                     <button
                       onClick={() => setSearch("")}
-                      className="col-span-2 px-3 py-2.5 border border-[#121e28] bg-[#050810] text-[9px] uppercase tracking-[0.2em] text-[#374650] hover:border-[#1e2d38] hover:text-[#4e6472] transition-colors"
+                      disabled={!search}
+                      className="col-span-2 px-3 py-2.5 border border-[#121e28] bg-[#050810] text-[9px] uppercase tracking-[0.2em] text-[#374650] hover:border-[#1e2d38] hover:text-[#4e6472] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
                       Clear Search
                     </button>

@@ -1,4 +1,4 @@
-import { ReportSnapshot } from "@/lib/warstate-utils";
+import { ReportSnapshot, parseCategory } from "@/lib/warstate-utils";
 
 interface ReportModalProps {
   report: ReportSnapshot;
@@ -9,15 +9,6 @@ interface ReportModalProps {
   onExportJSON: () => void;
   onCopyBrief: () => void;
 }
-
-const parseCategory = (str: string, maxLen = 55) => {
-  const ci = str.indexOf(":");
-  const has = ci > 0 && ci < maxLen;
-  return {
-    category: has ? str.slice(0, ci).trim() : null,
-    detail: has ? str.slice(ci + 1).trim() : str,
-  };
-};
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <div className="text-[8px] uppercase tracking-[0.36em] text-[#4e6472] mb-3">{children}</div>
@@ -121,6 +112,19 @@ export function ReportModal({
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Watch Next */}
+          <div>
+            <SectionLabel>Watch Next</SectionLabel>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              {report.theater.watchNext.map((item, idx) => (
+                <div key={idx} className="border border-[#1e2d38] bg-[#050810] px-3 py-3">
+                  <div className="text-[8px] uppercase tracking-[0.24em] text-[#374650] mb-2">Watch {idx + 1}</div>
+                  <div className="text-[12px] leading-5 text-[#7a8e9a]">{item}</div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -235,6 +239,8 @@ export function ReportModal({
               })}
             </div>
           </div>
+
+          <SectionDivider />
 
           {/* Source Stack */}
           <div>

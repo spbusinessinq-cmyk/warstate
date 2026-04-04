@@ -146,6 +146,17 @@ export function buildReportText(theater: Theater, runtime: Runtime): string {
   ].join("\n");
 }
 
+// Splits "CATEGORY: detail text" strings used in indicators and sources.
+// Returns { category, detail } — category is null when no colon prefix found.
+export function parseCategory(str: string, maxLen = 55): { category: string | null; detail: string } {
+  const ci = str.indexOf(":");
+  const has = ci > 0 && ci < maxLen;
+  return {
+    category: has ? str.slice(0, ci).trim() : null,
+    detail: has ? str.slice(ci + 1).trim() : str,
+  };
+}
+
 export function downloadFile(filename: string, content: string, type = "text/plain;charset=utf-8"): void {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
