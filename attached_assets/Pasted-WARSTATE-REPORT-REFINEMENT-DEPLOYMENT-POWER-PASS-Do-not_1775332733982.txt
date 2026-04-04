@@ -1,0 +1,282 @@
+WARSTATE — REPORT REFINEMENT + DEPLOYMENT POWER PASS
+
+Do not rebuild the app from scratch.
+Do not remove current working systems.
+Do not change the core visual identity.
+Refine and harden the existing WARSTATE build.
+
+OBJECTIVE
+Turn WARSTATE into a cleaner, sharper, more professional battlefield report system with:
+- better on-screen depth
+- stronger report readability
+- printable/exportable report output
+- correct spacing and typography
+- cleaner PDF layout
+- proper chart/bar rendering
+- stable deployed behavior
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — FULL AUDIT
+━━━━━━━━━━━━━━━━━━
+
+Run a full code and runtime audit of the current WARSTATE page.
+
+Check and fix:
+1. syntax issues
+2. broken imports
+3. bad state coupling
+4. stale generated report snapshot issues
+5. export path instability
+6. print-window issues
+7. PDF layout problems
+8. overflow / spacing bugs
+9. button behavior mismatches
+10. any dead code or duplicate logic
+
+Confirm:
+- app compiles cleanly
+- no runtime errors
+- no export-trigger crashes
+- no malformed strings
+- no broken escaped newlines
+- no panel switch instability
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — PDF / PRINT REPORT REDESIGN
+━━━━━━━━━━━━━━━━━━
+
+The current PDF is not print-friendly enough.
+
+Fix the exported report so it becomes a proper clean printable intelligence brief.
+
+MANDATES:
+- white or very light print background
+- dark readable text
+- no black full-page background
+- no glowing UI look in the PDF
+- no jammed bars
+- no overlapping labels
+- no clipped text
+- no terminal-style compression
+
+The exported PDF should look like:
+- intelligence brief
+- internal report
+- clean government / analyst packet
+- printable on normal paper
+
+PDF DESIGN TARGET:
+- title block at top
+- theater name
+- timestamp
+- posture / confidence / classification summary row
+- current status section
+- executive overview section
+- force ledger section
+- priority indicators section
+- source stack section
+- stress bars / chart block
+- comparison bars / chart block
+- balanced margins
+- strong spacing between sections
+- letter-size friendly
+- multi-page capable if needed
+
+IMPORTANT:
+If one page becomes too crowded, automatically flow onto page 2.
+Do not cram everything onto page 1.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — TYPOGRAPHY + LETTER SPACING
+━━━━━━━━━━━━━━━━━━
+
+Tighten the visual hierarchy across the app.
+
+Fix:
+- ugly letter spacing
+- over-compressed headings
+- inconsistent label sizes
+- too much micro-text
+- unreadable dense blocks
+- weak spacing between status content
+
+UI TARGET:
+- still tactical / command / intel
+- cleaner and more premium
+- less noisy
+- more depth and hierarchy
+- easier to scan
+
+Improve:
+- heading sizes
+- subheading spacing
+- section spacing
+- card padding
+- line-height
+- label hierarchy
+- panel readability
+
+Keep the WARSTATE brand intact.
+Do not turn it into a generic dashboard.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — ON-SCREEN DEPTH PASS
+━━━━━━━━━━━━━━━━━━
+
+The UI needs more depth and polish without becoming bloated.
+
+Improve the live interface with:
+- stronger panel hierarchy
+- better balance between top and lower sections
+- cleaner spacing in current status
+- clearer visual separation between summary and detail areas
+- more polished button layout
+- stronger active state styling
+- better density management
+
+Allowed improvements:
+- refined shadows
+- subtle inner borders
+- better spacing rhythm
+- stronger layout balance
+- cleaner visual grouping
+
+Not allowed:
+- giant redesign
+- cartoonish cards
+- bubbly UI
+- generic SaaS styling
+
+Target:
+“internal intelligence system with taste”
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — BARS / CHARTS
+━━━━━━━━━━━━━━━━━━
+
+The bars need to return strong in both UI and export.
+
+Fix all bar systems so they are:
+- clearly labeled
+- evenly spaced
+- not jammed together
+- not overlapping
+- visually aligned
+- readable in both dark UI and light PDF
+
+Requirements:
+- sector bars in UI remain strong
+- comparison bars in UI remain strong
+- PDF bars render cleanly
+- labels sit above or beside bars correctly
+- numeric values align correctly
+- bar groups have enough spacing
+- no text crossing bars
+
+If needed:
+- redesign only the chart block layout
+- keep the data and concept the same
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — BUTTON TRUTH PASS
+━━━━━━━━━━━━━━━━━━
+
+Every button must do exactly what it says.
+
+Validate and fix:
+- Live Refresh
+- Generate Report
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+- Clear Search
+
+Requirements:
+- no dead clicks
+- no silent failure
+- no mismatch between action and result
+- toast feedback for every successful action
+- graceful fallback for every blocked action
+- no action should rely on preview-only behavior
+
+Export rules:
+- PDF must produce a real PDF
+- TXT must download proper report text
+- JSON must download valid structured payload
+- Copy Brief must copy or open manual fallback cleanly
+- Print Report must open printable clean layout
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — REPORT SNAPSHOT INTEGRITY
+━━━━━━━━━━━━━━━━━━
+
+Preserve a true generated report snapshot.
+
+When Generate Report is pressed:
+- freeze the currently selected theater
+- freeze current posture / confidence / timestamp
+- freeze bars / values / text
+- use that snapshot for:
+  - modal
+  - PDF
+  - TXT
+  - JSON
+  - copy
+  - print
+
+Changing theater afterward must not mutate the already-generated report.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 8 — EDGEONE DEPLOYMENT HARDENING
+━━━━━━━━━━━━━━━━━━
+
+Prepare this file specifically for EdgeOne deployment.
+
+Make sure:
+- no top-level import causes deployment failure unnecessarily
+- lazy-loaded PDF dependency is safe
+- no browser-only APIs are called at render time
+- exports only fire on user action
+- no permission-blocked feature kills the app
+- no preview-specific hacks remain that would hurt deployment
+
+Validate:
+- build-safe
+- deploy-safe
+- runtime-safe
+
+━━━━━━━━━━━━━━━━━━
+PHASE 9 — FINAL VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After all fixes:
+1. run full build
+2. confirm no errors
+3. confirm page loads
+4. confirm all buttons work
+5. confirm PDF is printable and clean
+6. confirm TXT works
+7. confirm JSON works
+8. confirm Copy Brief works or falls back
+9. confirm Print Report opens clean layout
+10. confirm overall UI is tighter and more polished
+
+━━━━━━━━━━━━━━━━━━
+RETURN FORMAT
+━━━━━━━━━━━━━━━━━━
+
+Return exactly:
+
+1. Issues found
+2. Fixes made
+3. PDF/print changes made
+4. UI refinement changes made
+5. Any remaining blockers
+6. Whether WARSTATE is deployment-ready now
+
+IMPORTANT:
+Do the work.
+Do not just describe the work.
+Implement the fixes in the codebase.

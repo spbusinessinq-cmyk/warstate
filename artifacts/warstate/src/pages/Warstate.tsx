@@ -8,6 +8,7 @@ import {
   downloadFile,
   copyToClipboard,
   openPrintWindow,
+  renderPDFReport,
   ReportSnapshot,
 } from "@/lib/warstate-utils";
 import { ReportModal } from "@/components/warstate/ReportModal";
@@ -30,7 +31,7 @@ export default function Warstate() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = setTimeout(() => setToast(""), 2500);
+    const timer = setTimeout(() => setToast(""), 3000);
     return () => clearTimeout(timer);
   }, [toast]);
 
@@ -51,7 +52,6 @@ export default function Warstate() {
       ...sector,
       value: clamp(sector.value + ((index + refreshCount) % 2 === 0 ? drift : -drift), 18, 99),
     }));
-
     return {
       posture: POSTURE_MAP[selectedTheaterId][refreshCount % 3],
       confidence: CONFIDENCE_MAP[selectedTheaterId][refreshCount % 3],
@@ -65,6 +65,7 @@ export default function Warstate() {
   const trendBars = useMemo(() => buildTrendBars(theater), [theater]);
   const reportText = useMemo(() => buildReportText(theater, runtime), [theater, runtime]);
 
+  // activeReport is always a frozen snapshot if generated, otherwise live state
   const activeReport: ReportSnapshot = generatedReport ?? {
     theater,
     runtime,
@@ -83,9 +84,10 @@ export default function Warstate() {
   };
 
   const handleGenerateReport = () => {
-    setGeneratedReport({ theater, runtime, comparisonRows, trendBars, reportText });
+    const snapshot: ReportSnapshot = { theater, runtime, comparisonRows, trendBars, reportText };
+    setGeneratedReport(snapshot);
     setReportOpen(true);
-    setToast("Report generated");
+    setToast("Report generated and locked");
   };
 
   const handleExportPDF = async () => {
@@ -94,40 +96,16 @@ export default function Warstate() {
       const { jsPDF } = await import("jspdf");
       const source = activeReport;
       const doc = new jsPDF({ unit: "pt", format: "letter" });
-      doc.setFillColor(5, 8, 10);
-      doc.rect(0, 0, 612, 792, "F");
-      doc.setDrawColor(52, 211, 153);
-      doc.setLineWidth(1);
-      doc.rect(26, 26, 560, 740);
-      doc.setTextColor(220, 227, 232);
-      doc.setFont("courier", "bold");
-      doc.setFontSize(18);
-      doc.text("WARSTATE // FIELD STATUS REPORT", 42, 52);
-      doc.setFontSize(10);
-      doc.text(`${source.theater.title} // ${source.runtime.lastUpdated}`, 42, 70);
-      doc.setFont("courier", "normal");
-      const lines = doc.splitTextToSize(source.reportText, 508);
-      doc.text(lines, 42, 94);
-      const currentY = 520;
-      source.runtime.sectors.forEach((item, i) => {
-        const y = currentY + i * 24;
-        doc.setFont("courier", "bold");
-        doc.setFontSize(9);
-        doc.setTextColor(220, 227, 232);
-        doc.text(item.name, 42, y);
-        doc.setDrawColor(35, 45, 48);
-        doc.setFillColor(10, 17, 20);
-        doc.rect(42, y + 6, 210, 10, "FD");
-        doc.setFillColor(52, 211, 153);
-        doc.rect(42, y + 6, Math.max(0, Math.min(210, (item.value / 100) * 210)), 10, "F");
-        doc.setFont("courier", "normal");
-        doc.text(`${item.value}/100`, 42 + 210 + 8, y + 14);
-      });
+      renderPDFReport(doc, source);
       doc.save(`warstate-${source.theater.id}-report.pdf`);
       setToast("PDF exported");
-    } catch {
-      const opened = openPrintWindow(`${activeReport.theater.title} PDF Fallback`, activeReport.reportText);
-      setToast(opened ? "PDF fallback opened" : "PDF export failed");
+    } catch (err) {
+      console.error("PDF export failed:", err);
+      const opened = openPrintWindow(
+        `${activeReport.theater.title} // Print Fallback`,
+        activeReport.reportText
+      );
+      setToast(opened ? "PDF unavailable — print fallback opened" : "PDF export failed");
     } finally {
       setExportingPdf(false);
     }
@@ -145,8 +123,13 @@ export default function Warstate() {
       codename: activeReport.theater.codename,
       posture: activeReport.runtime.posture,
       confidence: activeReport.runtime.confidence,
+      lastRefresh: activeReport.runtime.lastUpdated,
       currentStatus: activeReport.runtime.currentStatus,
+      classification: activeReport.theater.classification,
+      sourceDiscipline: activeReport.theater.sourceDiscipline,
       data: activeReport.theater,
+      sectors: activeReport.runtime.sectors,
+      trendBars: activeReport.trendBars,
     };
     downloadFile(
       `warstate-${activeReport.theater.id}.json`,
@@ -159,24 +142,27 @@ export default function Warstate() {
   const handleCopyBrief = async () => {
     const copied = await copyToClipboard(activeReport.reportText);
     if (copied) {
-      setToast("Brief copied");
+      setToast("Brief copied to clipboard");
       setManualCopyOpen(false);
     } else {
       setManualCopyOpen(true);
-      setToast("Clipboard blocked — manual copy available");
+      setToast("Clipboard blocked — manual copy modal opened");
     }
   };
 
   const handlePrint = () => {
-    const opened = openPrintWindow(`${activeReport.theater.title} // Print`, activeReport.reportText);
-    setToast(opened ? "Print opened" : "Print blocked");
+    const opened = openPrintWindow(
+      `${activeReport.theater.title} // ${activeReport.theater.codename}`,
+      activeReport.reportText
+    );
+    setToast(opened ? "Print window opened" : "Print window blocked by browser");
   };
 
   const panelButton = (id: PanelId, label: string) => (
     <button
       key={id}
       onClick={() => setExpandedPanel(id)}
-      className={`px-3 py-2 border text-[10px] uppercase tracking-[0.2em] transition-colors ${
+      className={`px-4 py-2 border text-[10px] uppercase tracking-[0.22em] transition-colors ${
         expandedPanel === id
           ? "border-emerald-300 bg-emerald-300/10 text-emerald-200"
           : "border-white/10 bg-[#050709] text-[#9ba6ae] hover:border-emerald-400/30 hover:text-[#d7dde2]"
@@ -188,59 +174,78 @@ export default function Warstate() {
 
   return (
     <div className="min-h-screen bg-[#020405] text-[#d9dfe3] p-3 md:p-6 font-mono">
-      <div className="max-w-[1700px] mx-auto space-y-3">
+      <div className="max-w-[1700px] mx-auto space-y-4">
+
+        {/* Toast notification */}
         {toast && (
-          <div className="border border-emerald-300/30 bg-[#071012] px-4 py-3 text-xs uppercase tracking-[0.22em] text-emerald-200 animate-in fade-in slide-in-from-top-1 duration-200">
+          <div className="border border-emerald-300/40 bg-[#061110] px-5 py-3 text-xs uppercase tracking-[0.24em] text-emerald-200">
             {toast}
           </div>
         )}
 
-        <div className="border border-emerald-400/20 bg-[#05080a] shadow-[0_20px_80px_rgba(0,0,0,0.55)]">
-          {/* Header */}
-          <div className="border-b border-emerald-400/15 px-4 md:px-6 py-4 space-y-4">
-            <div className="grid grid-cols-1 xl:grid-cols-[1.25fr_0.95fr] gap-4 items-end">
+        <div className="border border-emerald-400/20 bg-[#05080a] shadow-[0_20px_80px_rgba(0,0,0,0.6)]">
+
+          {/* ── Header ── */}
+          <div className="border-b border-emerald-400/15 px-4 md:px-6 py-5 space-y-5">
+            <div className="grid grid-cols-1 xl:grid-cols-[1.25fr_0.95fr] gap-5 items-end">
+              {/* Branding */}
               <div className="space-y-2 min-w-0">
-                <div className="text-[11px] tracking-[0.34em] uppercase text-emerald-300/65">
-                  RSR WHITE WING // WARSTATE // OPERATIONAL STATUS SYSTEM
+                <div className="text-[11px] tracking-[0.34em] uppercase text-emerald-300/60">
+                  RSR White Wing // WARSTATE // Operational Status System
                 </div>
-                <h1 className="text-4xl md:text-6xl font-semibold leading-none tracking-tight">WARSTATE</h1>
-                <div className="text-sm text-[#8f9aa3] uppercase tracking-[0.18em]">
-                  Battlefield status monitor and report generator
+                <h1 className="text-5xl md:text-6xl font-semibold leading-none tracking-tight">WARSTATE</h1>
+                <div className="text-sm text-[#8f9aa3] uppercase tracking-[0.2em]">
+                  Battlefield Status Monitor and Report Generator
                 </div>
               </div>
+
+              {/* Status summary strip */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-emerald-400/15 border border-emerald-400/15 min-w-0">
-                <div className="bg-[#06090b] px-4 py-3">
-                  <div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Theater</div>
+                <div className="bg-[#06090b] px-4 py-4">
+                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Theater</div>
                   <div className="mt-2 text-sm truncate">{theater.short}</div>
                 </div>
-                <div className="bg-[#06090b] px-4 py-3">
-                  <div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Codename</div>
+                <div className="bg-[#06090b] px-4 py-4">
+                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Codename</div>
                   <div className="mt-2 text-sm text-emerald-300 truncate">{theater.codename}</div>
                 </div>
-                <div className="bg-[#06090b] px-4 py-3">
-                  <div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Posture</div>
+                <div className="bg-[#06090b] px-4 py-4">
+                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Posture</div>
                   <div className="mt-2 text-sm text-emerald-300 truncate">{runtime.posture}</div>
                 </div>
-                <div className="bg-[#06090b] px-4 py-3">
-                  <div className="text-[10px] text-[#7a868f] uppercase tracking-[0.24em]">Last Refresh</div>
+                <div className="bg-[#06090b] px-4 py-4">
+                  <div className="text-[9px] text-[#6e7d87] uppercase tracking-[0.28em]">Last Refresh</div>
                   <div className="mt-2 text-sm truncate">{runtime.lastUpdated}</div>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_1fr] gap-4">
-              {/* Theater Registry */}
-              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-3">
+            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_1fr] gap-5">
+
+              {/* ── Conflict Registry ── */}
+              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-4">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-[10px] uppercase tracking-[0.26em] text-[#7a868f]">Conflict registry</div>
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-[#7a868f]">{filteredTheaters.length} visible</div>
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">Conflict Registry</div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-[#6e7d87]">
+                    {filteredTheaters.length} visible
+                  </div>
                 </div>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search theater, region, codename..."
-                  className="w-full bg-[#050709] border border-white/10 px-3 py-3 text-sm outline-none placeholder:text-[#66727b] focus:border-emerald-400/30 transition-colors"
-                />
+                <div className="flex gap-2">
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search theater, region, codename..."
+                    className="flex-1 bg-[#050709] border border-white/10 px-3 py-2.5 text-sm outline-none placeholder:text-[#5e6d77] focus:border-emerald-400/35 transition-colors"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch("")}
+                      className="px-3 py-2.5 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.16em] hover:border-emerald-400/30 transition-colors whitespace-nowrap"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 xl:grid-cols-5 gap-2">
                   {filteredTheaters.map((id) => {
                     const entry = THEATERS[id];
@@ -256,40 +261,42 @@ export default function Warstate() {
                             : "border-white/10 bg-[#050709] text-[#9ba6ae] hover:border-emerald-400/30 hover:text-[#d7dde2]"
                         }`}
                       >
-                        <div className="uppercase tracking-[0.16em]">{entry.short}</div>
-                        <div className="mt-1 text-[10px] uppercase tracking-[0.14em] opacity-70">Code: {entry.codename}</div>
+                        <div className="uppercase tracking-[0.16em] font-semibold">{entry.short}</div>
+                        <div className="mt-1 text-[9px] uppercase tracking-[0.14em] opacity-60">
+                          {entry.codename}
+                        </div>
                       </button>
                     );
                   })}
                   {filteredTheaters.length === 0 && (
-                    <div className="col-span-5 py-4 text-center text-xs text-[#66727b] uppercase tracking-[0.2em]">
+                    <div className="col-span-5 py-6 text-center text-xs text-[#5e6d77] uppercase tracking-[0.22em]">
                       No theaters match query
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-3">
-                <div className="text-[10px] uppercase tracking-[0.26em] text-[#7a868f]">Actions</div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {/* ── Actions ── */}
+              <div className="border border-emerald-400/15 bg-[#06090b] px-4 py-4 space-y-4">
+                <div className="text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">Actions</div>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     disabled={refreshing}
                     onClick={handleRefresh}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-60 transition-colors"
+                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-50 transition-colors"
                   >
                     {refreshing ? "Refreshing..." : "Live Refresh"}
                   </button>
                   <button
                     onClick={handleGenerateReport}
-                    className="px-3 py-3 border border-emerald-300 bg-emerald-300/10 text-xs uppercase tracking-[0.18em] text-emerald-200 hover:bg-emerald-300/15 transition-colors"
+                    className="px-3 py-3 border border-emerald-300 bg-emerald-300/10 text-xs uppercase tracking-[0.18em] text-emerald-200 hover:bg-emerald-300/18 transition-colors"
                   >
                     Generate Report
                   </button>
                   <button
                     disabled={exportingPdf}
                     onClick={handleExportPDF}
-                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-60 transition-colors"
+                    className="px-3 py-3 border border-white/10 bg-[#050709] text-xs uppercase tracking-[0.18em] hover:border-emerald-400/30 disabled:opacity-50 transition-colors"
                   >
                     {exportingPdf ? "Exporting..." : "Export PDF"}
                   </button>
@@ -324,67 +331,70 @@ export default function Warstate() {
                     Clear Search
                   </button>
                 </div>
-                <div className="text-[11px] leading-6 text-[#95a1aa]">
-                  All export actions snapshot the active report at generation time. PDF export lazy-loads the renderer on click.
+                <div className="text-[10px] leading-6 text-[#8a9aa4] border-t border-white/5 pt-3">
+                  {generatedReport
+                    ? `Report locked: ${generatedReport.theater.short} // ${generatedReport.runtime.lastUpdated}`
+                    : "No active report — exports use live state until report is generated."}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Main Content */}
+          {/* ── Main Content ── */}
           <div className="p-4 md:p-6 space-y-4">
             <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-4">
-              {/* Status panel */}
+
+              {/* ── Current Status panel ── */}
               <div className="border border-emerald-400/15 bg-[#06090b]">
-                <div className="border-b border-emerald-400/10 px-4 py-3 text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">
-                  Current status
+                <div className="border-b border-emerald-400/10 px-5 py-3 text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">
+                  Current Status
                 </div>
-                <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-4">
+                <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-5">
                     <div>
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Product</div>
-                      <div className="mt-2 text-lg text-[#f2f5f7]">{theater.title}</div>
+                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Product</div>
+                      <div className="text-lg leading-tight text-[#f2f5f7]">{theater.title}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Classification</div>
-                      <div className="mt-2 text-sm text-[#c0c9cf]">{theater.classification}</div>
+                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Classification</div>
+                      <div className="text-sm text-[#c0c9cf] leading-6">{theater.classification}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Source discipline</div>
-                      <div className="mt-2 text-sm leading-6 text-[#c0c9cf]">{theater.sourceDiscipline}</div>
+                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Source Discipline</div>
+                      <div className="text-sm leading-6 text-[#c0c9cf]">{theater.sourceDiscipline}</div>
                     </div>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div>
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Status line</div>
-                      <div className="mt-2 text-sm leading-6 text-[#c0c9cf]">{runtime.currentStatus}</div>
+                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-2">Status Line</div>
+                      <div className="text-sm leading-6 text-[#c0c9cf]">{runtime.currentStatus}</div>
                     </div>
-                    <div className="grid grid-cols-2 gap-px bg-white/10">
+                    <div className="grid grid-cols-2 gap-px bg-white/8">
                       <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Region</div>
-                        <div className="mt-2 text-sm">{theater.region}</div>
+                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Region</div>
+                        <div className="text-sm">{theater.region}</div>
                       </div>
                       <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Confidence</div>
-                        <div className="mt-2 text-sm">{runtime.confidence}</div>
+                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Confidence</div>
+                        <div className="text-sm">{runtime.confidence}</div>
                       </div>
                       <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Refresh Count</div>
-                        <div className="mt-2 text-sm">{refreshCount}</div>
+                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Refresh Count</div>
+                        <div className="text-sm">{refreshCount}</div>
                       </div>
                       <div className="bg-[#050709] px-3 py-3">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-[#7a868f]">Engine</div>
-                        <div className="mt-2 text-sm">REPORT CORE</div>
+                        <div className="text-[9px] uppercase tracking-[0.22em] text-[#6e7d87] mb-2">Engine</div>
+                        <div className="text-sm">REPORT CORE</div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Detail panels */}
+              {/* ── Detail panels ── */}
               <div className="border border-emerald-400/15 bg-[#06090b]">
                 <div className="border-b border-emerald-400/10 px-4 py-3 flex flex-wrap gap-2 items-center justify-between">
-                  <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Detail panels</div>
+                  <div className="text-[10px] uppercase tracking-[0.28em] text-[#6e7d87]">Detail Panels</div>
                   <div className="flex flex-wrap gap-2">
                     {panelButton("overview", "Overview")}
                     {panelButton("ledger", "Ledger")}
@@ -394,16 +404,23 @@ export default function Warstate() {
                   </div>
                 </div>
 
-                <div className="p-4 min-h-[420px]">
+                <div className="p-5 min-h-[440px]">
+
+                  {/* Overview */}
                   {expandedPanel === "overview" && (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div>
-                        <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Executive overview</div>
-                        <p className="mt-3 text-sm leading-7 text-[#c7d0d6]">{theater.overview}</p>
+                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">
+                          Executive Overview
+                        </div>
+                        <p className="text-sm leading-7 text-[#c7d0d6]">{theater.overview}</p>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         {theater.indicators.slice(0, 3).map((item) => (
-                          <div key={item} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">
+                          <div
+                            key={item}
+                            className="border border-white/8 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]"
+                          >
                             {item}
                           </div>
                         ))}
@@ -411,24 +428,25 @@ export default function Warstate() {
                     </div>
                   )}
 
+                  {/* Ledger */}
                   {expandedPanel === "ledger" && (
                     <div className="border border-white/10 overflow-hidden">
                       <table className="w-full text-sm">
-                        <thead className="bg-[#081014] text-[#93a0a9] uppercase tracking-[0.18em] text-[10px]">
+                        <thead className="bg-[#081014] text-[#8a9aa4] uppercase tracking-[0.18em] text-[9px]">
                           <tr>
-                            <th className="text-left px-3 py-3 font-medium">Metric</th>
-                            <th className="text-left px-3 py-3 font-medium">{theater.friendly.label}</th>
-                            <th className="text-left px-3 py-3 font-medium">{theater.opposing.label}</th>
-                            <th className="text-left px-3 py-3 font-medium">Type</th>
+                            <th className="text-left px-4 py-3 font-medium">Metric</th>
+                            <th className="text-left px-4 py-3 font-medium">{theater.friendly.label}</th>
+                            <th className="text-left px-4 py-3 font-medium">{theater.opposing.label}</th>
+                            <th className="text-left px-4 py-3 font-medium">Type</th>
                           </tr>
                         </thead>
                         <tbody>
                           {comparisonRows.map(([metric, friendly, opposing, note], idx) => (
                             <tr key={metric} className={idx % 2 === 0 ? "bg-[#050709]" : "bg-[#070b0d]"}>
-                              <td className="px-3 py-3 text-[#dde3e7]">{metric}</td>
-                              <td className="px-3 py-3 text-[#bec8ce]">{friendly}</td>
-                              <td className="px-3 py-3 text-[#bec8ce]">{opposing}</td>
-                              <td className="px-3 py-3 text-[#7d8992] uppercase text-[10px] tracking-[0.18em]">{note}</td>
+                              <td className="px-4 py-3 text-[#dde3e7]">{metric}</td>
+                              <td className="px-4 py-3 text-[#bec8ce]">{friendly}</td>
+                              <td className="px-4 py-3 text-[#bec8ce]">{opposing}</td>
+                              <td className="px-4 py-3 text-[#6e7d87] uppercase text-[9px] tracking-[0.18em]">{note}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -436,25 +454,36 @@ export default function Warstate() {
                     </div>
                   )}
 
+                  {/* Indicators */}
                   {expandedPanel === "indicators" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {theater.indicators.map((item) => (
-                        <div key={item} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">
-                          {item}
-                        </div>
-                      ))}
+                    <div className="space-y-3">
+                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Priority Indicators</div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {theater.indicators.map((item, idx) => (
+                          <div
+                            key={item}
+                            className="border border-white/8 bg-[#050709] px-4 py-3 text-sm leading-6 text-[#c7d0d6]"
+                          >
+                            <span className="text-[#6e7d87] text-[10px] tracking-[0.14em] mr-2">{idx + 1}.</span>
+                            {item}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
+                  {/* Stress */}
                   {expandedPanel === "stress" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-4">
-                        <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f] mb-1">Sector stress index</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-5">
+                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87]">
+                          Sector Stress Index
+                        </div>
                         {runtime.sectors.map((sector) => (
                           <div key={sector.name}>
                             <div className="flex justify-between text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]">
                               <span>{sector.name}</span>
-                              <span>{sector.value}</span>
+                              <span className="tabular-nums">{sector.value}</span>
                             </div>
                             <div className="h-3 bg-[#0b1114] border border-white/5">
                               <div
@@ -465,42 +494,59 @@ export default function Warstate() {
                           </div>
                         ))}
                       </div>
-                      <div className="space-y-4">
-                        <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f] mb-1">Relative attrition</div>
+                      <div className="space-y-5">
+                        <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87]">
+                          Relative Attrition
+                        </div>
                         {trendBars.map((bar) => (
                           <div key={bar.label}>
                             <div className="flex justify-between gap-4 text-[11px] text-[#b8c2c8] mb-2 uppercase tracking-[0.14em]">
                               <span>{bar.label}</span>
-                              <span>{bar.friendly} / {bar.opposing}</span>
+                              <span className="tabular-nums">
+                                {bar.friendly} / {bar.opposing}
+                              </span>
                             </div>
                             <div className="space-y-1">
                               <div className="h-3 bg-[#0b1114] border border-white/5">
-                                <div className="h-full bg-emerald-300/85 transition-all duration-700" style={{ width: `${bar.friendly}%` }} />
+                                <div
+                                  className="h-full bg-emerald-300/85 transition-all duration-700"
+                                  style={{ width: `${bar.friendly}%` }}
+                                />
                               </div>
                               <div className="h-3 bg-[#0b1114] border border-white/5">
-                                <div className="h-full bg-[#7e8a93] transition-all duration-700" style={{ width: `${bar.opposing}%` }} />
+                                <div
+                                  className="h-full bg-[#7e8a93] transition-all duration-700"
+                                  style={{ width: `${bar.opposing}%` }}
+                                />
                               </div>
                             </div>
                           </div>
                         ))}
-                        <div className="flex gap-4 text-[10px] uppercase tracking-[0.14em] text-[#7a868f] pt-1">
+                        <div className="flex gap-5 text-[9px] uppercase tracking-[0.18em] text-[#6e7d87] pt-2 border-t border-white/5">
                           <span className="flex items-center gap-2">
-                            <span className="inline-block w-3 h-2 bg-emerald-300/85" /> {theater.friendly.label}
+                            <span className="inline-block w-3 h-2 bg-emerald-300/85" />
+                            {theater.friendly.label}
                           </span>
                           <span className="flex items-center gap-2">
-                            <span className="inline-block w-3 h-2 bg-[#7e8a93]" /> {theater.opposing.label}
+                            <span className="inline-block w-3 h-2 bg-[#7e8a93]" />
+                            {theater.opposing.label}
                           </span>
                         </div>
                       </div>
                     </div>
                   )}
 
+                  {/* Sources */}
                   {expandedPanel === "sources" && (
                     <div className="space-y-4">
-                      <div className="text-[10px] uppercase tracking-[0.24em] text-[#7a868f]">Source stack</div>
+                      <div className="text-[9px] uppercase tracking-[0.28em] text-[#6e7d87] mb-3">Source Stack</div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {theater.sources.map((source) => (
-                          <div key={source} className="border border-white/10 bg-[#050709] px-3 py-3 text-sm leading-6 text-[#c7d0d6]">
+                        {theater.sources.map((source, idx) => (
+                          <div
+                            key={source}
+                            className="border border-white/8 bg-[#050709] px-4 py-3 text-sm leading-6 text-[#c7d0d6]"
+                          >
+                            <span className="text-[#6e7d87] text-[10px] tracking-[0.14em] mr-2">{idx + 1}.</span>
                             {source}
                           </div>
                         ))}
@@ -514,7 +560,7 @@ export default function Warstate() {
         </div>
       </div>
 
-      {/* Manual copy fallback */}
+      {/* Manual copy fallback modal */}
       {manualCopyOpen && (
         <ManualCopyModal
           reportText={activeReport.reportText}
