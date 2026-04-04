@@ -1,0 +1,261 @@
+WARSTATE — REPORT COLLISION FIX + LAUNCH-READY PASS
+
+Do not redesign the app from scratch.
+Do not remove working actions.
+Do not break current report snapshot behavior.
+Work from the CURRENT code exactly as it exists now.
+
+PRIMARY OBJECTIVE:
+Fix the report layout collisions, tighten final usability, and make WARSTATE launch-ready.
+
+The current app is close, but there are still real issues:
+- PDF/report text collisions in the force ledger and later sections
+- section flow in exported/printed report is not stable enough
+- UI still needs final polish for launch
+- report output must look deliberate and readable
+- all actions must remain working
+
+Implement the fixes in code.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — REPORT LAYOUT COLLISION FIX
+━━━━━━━━━━━━━━━━━━
+
+The printable/exported report currently has text collisions and bad wrapping.
+
+Fix all report/PDF layout issues, especially:
+- overlapping ledger columns
+- long values colliding into adjacent columns
+- section text breaking into other sections
+- page break issues
+- footer/header crowding
+- bar/chart labels colliding with values
+- content getting too wide for the printable area
+
+Specific fixes required:
+1. Rebuild the FORCE LEDGER export layout so it is not a cramped inline text block.
+2. Use a true column system for the PDF/report output.
+3. Wrap long values cleanly inside their own column width.
+4. Increase row height dynamically when text wraps.
+5. Ensure each row fully clears before the next row begins.
+6. Prevent any content from crossing the right margin.
+7. Make section spacing more deliberate before and after the ledger.
+8. Keep the PDF/report readable on standard letter-size pages.
+
+If needed:
+- move part of the ledger to page 2
+- split large sections across pages
+- reduce width of labels
+- allocate wider columns to value-heavy fields
+
+DO NOT leave any overlapping text in the report.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — PDF/PRINT EXPORT HARDENING
+━━━━━━━━━━━━━━━━━━
+
+The report export needs to feel finished and launch-safe.
+
+Improve:
+- title block spacing
+- metadata strip spacing
+- section spacing
+- ledger formatting
+- priority indicator spacing
+- source stack spacing
+- chart block flow
+- page-break logic
+
+Rules:
+- printable report must be light-background
+- text must be dark and readable
+- green only as restrained accent
+- page breaks must be clean
+- no clipped content
+- no awkward giant empty zones unless structurally necessary
+- no collision between bars and section content
+
+If one page gets too dense:
+- automatically continue to a second or third page
+- do not force everything onto one page
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — PROPER PDF TABLE / REPORT STRUCTURE
+━━━━━━━━━━━━━━━━━━
+
+Refactor exported report generation to use more structured layout logic.
+
+For the exported PDF:
+- create reusable section spacing logic
+- create reusable wrapped text block logic
+- create reusable table row logic with dynamic height
+- create reusable page-break check logic
+- create reusable chart block logic
+
+The ledger must behave like a real printable table, not a manual text dump.
+
+Required PDF sections:
+1. Title block
+2. Theater metadata strip
+3. Current status
+4. Executive overview
+5. Force ledger
+6. Priority indicators
+7. Source stack
+8. Sector stress index
+9. Relative attrition
+
+Ensure each section starts cleanly and does not collide with the previous one.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — FINAL UI POLISH FOR LAUNCH
+━━━━━━━━━━━━━━━━━━
+
+Do a final launch polish pass on the live UI.
+
+Do not radically redesign it.
+Just tighten and refine.
+
+Improve:
+- spacing rhythm
+- action panel density
+- theater registry polish
+- current status readability
+- detail panel composition
+- modal readability
+- border consistency
+- visual hierarchy
+- button grouping
+
+Keep the style:
+- black / graphite main base
+- restrained tactical green accents
+- serious internal intelligence look
+
+Reduce:
+- awkward spacing
+- thin/clunky visual rhythm
+- weak hierarchy
+- any remaining ugly alignment issues
+
+Make it feel:
+finished
+sharp
+launchable
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — DETAIL / MODAL CLEANUP
+━━━━━━━━━━━━━━━━━━
+
+Polish the report modal and lower detail area.
+
+Fix:
+- cramped content
+- uneven spacing
+- weak chart placement
+- inconsistent section separation
+- awkward line lengths
+- any overflow behavior problems
+
+The report modal should feel like:
+a locked internal report preview
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — BUTTON TRUTH VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+Revalidate every action after the report fixes.
+
+Confirm working:
+- Live Refresh
+- Generate Report
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+- Clear Search
+
+Requirements:
+- no dead clicks
+- no silent failures
+- no broken report snapshot logic
+- exports should use the locked generated report when one exists
+- live state should still work cleanly before report generation
+- PDF export must remain real and not regress
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — SNAPSHOT INTEGRITY
+━━━━━━━━━━━━━━━━━━
+
+Preserve and verify the generated report snapshot system.
+
+When “Generate Report” is clicked:
+- freeze theater
+- freeze timestamp
+- freeze posture / confidence
+- freeze indicators
+- freeze bars
+- freeze ledger values
+
+All report outputs must use that locked snapshot:
+- modal
+- PDF
+- TXT
+- JSON
+- copy
+- print
+
+Changing theater afterward must not mutate the already-generated report.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 8 — LAUNCH-READY HARDENING
+━━━━━━━━━━━━━━━━━━
+
+Make WARSTATE ready for live deployment.
+
+Validate:
+- no syntax errors
+- no runtime errors
+- no import issues
+- no export crashes
+- no report layout collisions
+- no broken lazy-load behavior
+- no permission failure without fallback
+- no obvious UI instability
+
+Do a final sanity pass for:
+- build safety
+- runtime safety
+- export safety
+- report safety
+- launch readiness
+
+━━━━━━━━━━━━━━━━━━
+PHASE 9 — FINAL VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After fixes:
+1. run full build
+2. verify app loads
+3. verify no console errors
+4. verify report modal works
+5. verify PDF export works
+6. verify PDF has no overlapping text
+7. verify multi-page behavior if needed
+8. verify TXT/JSON still work
+9. verify Copy Brief still works or falls back
+10. verify Print Report works
+11. verify WARSTATE feels launch-ready
+
+RETURN EXACTLY:
+1. Report layout issues found
+2. Report/PDF fixes made
+3. UI polish changes made
+4. Functionality validated
+5. Any remaining blockers
+6. Whether WARSTATE is launch-ready now
+
+IMPORTANT:
+Implement the fixes in code.
+Do not just describe them.
