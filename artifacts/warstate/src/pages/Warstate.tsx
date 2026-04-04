@@ -450,24 +450,51 @@ export default function Warstate() {
 
                   {/* ── OVERVIEW ── */}
                   {expandedPanel === "overview" && (
-                    <div className="space-y-5">
+                    <div className="space-y-6">
+
+                      {/* Executive Overview */}
                       <div>
                         <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Executive Overview</div>
                         <p className="text-sm leading-7 text-[#b0bec6]">{theater.overview}</p>
                       </div>
+
+                      {/* Escalation Drivers */}
                       <div>
-                        <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Key Indicators</div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          {theater.indicators.slice(0, 3).map((item) => (
-                            <div
-                              key={item}
-                              className="border border-[#111c24] bg-[#060a0d] px-3 py-3 text-sm leading-6 text-[#8a9eaa]"
-                            >
-                              {item}
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Escalation Drivers</div>
+                          <div className="flex-1 border-t border-[#111c24]" />
+                        </div>
+                        <div className="space-y-2">
+                          {theater.escalationDrivers.map((driver, idx) => (
+                            <div key={idx} className="flex gap-3 border border-[#1a2830] bg-[#060a0d] px-4 py-3">
+                              <div className="text-[10px] font-bold text-[#4caf87] tabular-nums select-none mt-0.5 shrink-0">
+                                {String(idx + 1).padStart(2, "0")}
+                              </div>
+                              <div className="text-sm leading-6 text-[#8a9eaa]">{driver}</div>
                             </div>
                           ))}
                         </div>
                       </div>
+
+                      {/* Watch Next */}
+                      <div>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Watch Next</div>
+                          <div className="flex-1 border-t border-[#111c24]" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          {theater.watchNext.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="border border-[#111c24] bg-[#060a0d] px-3 py-3"
+                            >
+                              <div className="text-[9px] text-[#265c42] mb-1.5 uppercase tracking-[0.2em]">Watch Item {idx + 1}</div>
+                              <div className="text-sm leading-6 text-[#8a9eaa]">{item}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                     </div>
                   )}
 
@@ -502,19 +529,30 @@ export default function Warstate() {
 
                   {/* ── INDICATORS ── */}
                   {expandedPanel === "indicators" && (
-                    <div className="space-y-3">
-                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Priority Indicators</div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {theater.indicators.map((item, idx) => (
+                    <div className="space-y-2">
+                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-4">Priority Indicators</div>
+                      {theater.indicators.map((item, idx) => {
+                        const colonIdx = item.indexOf(":");
+                        const hasCategory = colonIdx > 0 && colonIdx < 40;
+                        const category = hasCategory ? item.slice(0, colonIdx) : null;
+                        const detail = hasCategory ? item.slice(colonIdx + 1).trim() : item;
+                        return (
                           <div
-                            key={item}
-                            className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
+                            key={idx}
+                            className="flex gap-4 border border-[#1a2830] bg-[#060a0d] px-4 py-3"
                           >
-                            <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
-                            {item}
+                            <div className="text-[10px] font-bold text-[#52666e] tabular-nums select-none mt-0.5 shrink-0 w-5">
+                              {idx + 1}.
+                            </div>
+                            <div>
+                              {category && (
+                                <div className="text-[9px] uppercase tracking-[0.22em] text-[#4caf87] mb-1">{category}</div>
+                              )}
+                              <div className="text-sm leading-6 text-[#8a9eaa]">{detail}</div>
+                            </div>
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -583,17 +621,29 @@ export default function Warstate() {
                   {/* ── SOURCES ── */}
                   {expandedPanel === "sources" && (
                     <div className="space-y-3">
-                      <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e] mb-3">Source Stack</div>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-[#52666e]">Source Stack</div>
+                        <div className="flex-1 border-t border-[#111c24]" />
+                        <div className="text-[9px] uppercase tracking-[0.2em] text-[#364a56]">{theater.sources.length} categories</div>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {theater.sources.map((source, idx) => (
-                          <div
-                            key={source}
-                            className="border border-[#111c24] bg-[#060a0d] px-4 py-3 text-sm leading-6 text-[#8a9eaa]"
-                          >
-                            <span className="text-[#364a56] text-[10px] tracking-[0.14em] mr-2 select-none">{idx + 1}.</span>
-                            {source}
-                          </div>
-                        ))}
+                        {theater.sources.map((src, idx) => {
+                          const colonIdx = src.indexOf(":");
+                          const hasCategory = colonIdx > 0 && colonIdx < 50;
+                          const category = hasCategory ? src.slice(0, colonIdx).trim() : null;
+                          const detail = hasCategory ? src.slice(colonIdx + 1).trim() : src;
+                          return (
+                            <div
+                              key={idx}
+                              className="border border-[#1a2830] bg-[#060a0d] px-4 py-3"
+                            >
+                              {category && (
+                                <div className="text-[9px] uppercase tracking-[0.22em] text-[#4caf87] mb-1.5">{category}</div>
+                              )}
+                              <div className="text-[11px] leading-5 text-[#7a8e9a]">{detail}</div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}

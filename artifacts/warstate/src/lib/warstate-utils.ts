@@ -104,6 +104,16 @@ export function buildReportText(theater: Theater, runtime: Runtime): string {
     theater.overview,
     "",
     "------------------------------------------------------",
+    "ESCALATION DRIVERS",
+    "------------------------------------------------------",
+    ...theater.escalationDrivers.map((item, idx) => `  ${idx + 1}. ${item}`),
+    "",
+    "------------------------------------------------------",
+    "WATCH NEXT",
+    "------------------------------------------------------",
+    ...theater.watchNext.map((item, idx) => `  ${idx + 1}. ${item}`),
+    "",
+    "------------------------------------------------------",
     "FORCE LEDGER",
     "------------------------------------------------------",
     `  ${theater.friendly.label}`,
@@ -391,6 +401,36 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
   // === Executive Overview ===
   sectionHeader("Executive Overview");
   bodyText(source.theater.overview);
+
+  // === Escalation Drivers ===
+  sectionHeader("Escalation Drivers");
+  source.theater.escalationDrivers.forEach((item, idx) => {
+    const lines: string[] = doc.splitTextToSize(`${idx + 1}.  ${item}`, CW - 6);
+    lines.forEach((line: string, li: number) => {
+      checkPage(14);
+      doc.setFont("courier", li === 0 ? "bold" : "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(26, 31, 35);
+      doc.text(line, ML, y);
+      y += 13;
+    });
+    y += 3;
+  });
+
+  // === Watch Next ===
+  sectionHeader("Watch Next");
+  source.theater.watchNext.forEach((item, idx) => {
+    const lines: string[] = doc.splitTextToSize(`${idx + 1}.  ${item}`, CW - 6);
+    lines.forEach((line: string, li: number) => {
+      checkPage(14);
+      doc.setFont("courier", li === 0 ? "bold" : "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(26, 31, 35);
+      doc.text(line, ML, y);
+      y += 13;
+    });
+    y += 3;
+  });
 
   // === Force Ledger ===
   sectionHeader("Force Ledger");

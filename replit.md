@@ -28,7 +28,15 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
   - Live refresh with posture/confidence cycling
   - Report generation with modal viewer
   - Export to PDF (jspdf), TXT, JSON; copy brief to clipboard; print
-- **Data**: All static data in `src/data/theaters.ts`
+  - Overview panel: Executive Overview + Escalation Drivers (numbered) + Watch Next (3-column cards)
+  - Indicators panel: category-prefix extraction for rich source-style display
+  - Sources panel: category/detail split rendering (e.g. "OFFICIAL / STATE: ...")
+- **Data model** (`src/data/theaters.ts`):
+  - `Theater` interface has `escalationDrivers: string[]` and `watchNext: string[]`
+  - All 10 theaters have rich multi-sentence `statusLine`, `overview`, `escalationDrivers`, `watchNext`, structured `indicators` (with category prefixes), and 6-item categorized `sources`
+  - Sectors are theater-specific (5 dimensions per theater)
+  - `POSTURE_MAP` and `CONFIDENCE_MAP` updated to match new theater data
+- **Design language**: `#020304` black bg, `#1a2830` steel borders, `#265c42` active border, `#5ec998` active text, `#4caf87` accent, `#1c6348` bar fill, `#374a56` opposing bar, monospace throughout
 - **Dependencies**: jspdf (lazy-loaded on PDF export), wouter, tailwindcss
 
 ## Key Commands
