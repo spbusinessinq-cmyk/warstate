@@ -1,0 +1,113 @@
+WARSTATE — FIRST STABILIZATION PASS
+
+Do not redesign the app.
+Do not add new features yet.
+Do not touch styling unless required for clarity or broken layout.
+
+Objective:
+Validate that WARSTATE works as one unified battlefield status system in the live environment.
+
+Run a full stabilization and functionality pass on the current build.
+
+Check and fix only the following:
+
+1. CORE RENDER
+- app loads cleanly with no blank screen
+- no syntax/runtime errors
+- no broken imports
+- no hydration/render issues
+- all current panels render correctly
+
+2. THEATER SWITCHING
+- every theater button works
+- changing theaters updates:
+  - title
+  - codename
+  - posture
+  - confidence
+  - current status
+  - indicators
+  - sectors
+  - source stack
+- no stale state from prior theater remains visible
+
+3. SEARCH / REGISTRY
+- search input filters theaters correctly
+- clear search button resets correctly
+- theater grid remains visible and usable on desktop
+- no layout break when filtered results are short or empty
+
+4. DETAIL PANELS
+- Overview panel works
+- Ledger panel works
+- Indicators panel works
+- Stress panel works
+- Sources panel works
+- switching between panels is instant and stable
+- no panel should cause massive vertical overflow or broken spacing
+
+5. REPORT GENERATION
+- Generate Report creates a stable snapshot of the currently selected theater
+- report modal opens correctly
+- modal content matches the selected theater at generation time
+- closing and reopening works
+- generated report should not mutate incorrectly after panel changes
+
+6. EXPORT ACTIONS
+Validate all action buttons:
+- Export PDF
+- Export TXT
+- Export JSON
+- Copy Brief
+- Print Report
+
+Requirements:
+- each button must do exactly what its label says
+- no dead clicks
+- no console errors
+- no permission crash without fallback
+- PDF path must work in deployed environment
+- TXT and JSON must download correctly
+- Copy Brief must work or cleanly fall back
+- Print Report must open usable print output
+
+7. PDF OUTPUT
+Verify PDF contains:
+- report title
+- theater name
+- posture
+- confidence
+- current status
+- executive overview
+- bars / visual stress graphics
+- readable spacing and margins
+- no clipped text
+- no overlapping elements
+
+8. REPORT CONSISTENCY
+Make sure the exported report and on-screen report match the same generated snapshot.
+Do not allow mismatch between:
+- visible theater state
+- generated modal
+- exported file contents
+
+9. UX CLEANUP
+Fix only clear usability issues:
+- overly cramped button rows
+- broken wrapping
+- unreadable text
+- overflow issues
+- mobile/desktop layout bugs
+Do not redesign the product.
+
+10. FINAL VALIDATION
+After fixes:
+- run full app build
+- confirm no errors
+- confirm WARSTATE is stable for deployment testing
+
+Return:
+- exact issues found
+- exact fixes made
+- anything still blocked
+- whether WARSTATE is ready for next pass
