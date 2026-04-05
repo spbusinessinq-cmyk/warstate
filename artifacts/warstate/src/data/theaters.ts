@@ -29,6 +29,9 @@ export interface Theater {
   indicators: string[];
   sectors: TheaterSector[];
   sources: string[];
+  evidencePosture: "CONFIRMED" | "LIKELY" | "CONTESTED" | "MIXED";
+  confidenceRationale: string;
+  claimNotes: string[];
 }
 
 export const THEATERS: Record<string, Theater> = {
@@ -95,6 +98,13 @@ export const THEATERS: Record<string, Theater> = {
       "MARITIME / LOGISTICS: UKMTO incident log, Ambrey Risk, Lloyd's Market Intelligence",
       "REGIONAL / LOCAL: Haaretz, Iran International, Tasnim News (adversarial), Kurdistan 24",
     ],
+    evidencePosture: "MIXED",
+    confidenceRationale: "Strike effects are partially confirmed via OSINT geolocation and satellite imagery, but Iranian state suppression of casualty and military data blocks independent verification at depth. Proxy attribution requires multi-source corroboration across adversarial frames. A significant proportion of initial reporting in this theater is unverified claim that precedes confirmed damage by 24–72 hours.",
+    claimNotes: [
+      "Iranian air defense degradation levels are disputed — IDF claims of system destruction frequently exceed independently verified OSINT damage assessments.",
+      "Proxy casualty figures rely on Hezbollah martyr announcements and IRGC statements rather than independent military verification.",
+      "Hormuz interdiction threats represent credible posture signaling but have not translated to confirmed operational interdiction as of this report cycle.",
+    ],
   },
 
   // ─── UKRAINE ─────────────────────────────────────────────────────────────────
@@ -158,6 +168,13 @@ export const THEATERS: Record<string, Theater> = {
       "MILITARY / STRIKE REPORTING: UK MoD daily intelligence update, RUSI Ukraine analysis, Janes",
       "HUMANITARIAN / DISPLACEMENT: UNHCR Ukraine situation reports, OCHA displacement tracking",
       "INFRASTRUCTURE / ENERGY: IEA Ukraine energy reporting, Ukrainian energy operator statements",
+    ],
+    evidencePosture: "LIKELY",
+    confidenceRationale: "Visually confirmed equipment losses via Oryx represent the gold-standard data layer for this theater — methodology is independent and conservative. Territory control is reliably tracked by ISW and DeepState. Casualty figures are range estimates from Western intelligence assessments and carry inherent imprecision. Overall evidence confidence is higher than most active conflict theaters due to the volume and independence of OSINT corroboration.",
+    claimNotes: [
+      "Ukrainian and Russian official casualty estimates diverge dramatically — Western intelligence range estimates are used here as more analytically credible than either party's official claim.",
+      "Russian territorial gain claims frequently exceed or lag actual confirmed control changes by 12–72 hours on first reporting.",
+      "Equipment loss ratios represent gross confirmed losses and do not account for battlefield recovery and field repair — net operational fleet reductions may differ from raw loss counts.",
     ],
   },
 
@@ -223,6 +240,13 @@ export const THEATERS: Record<string, Theater> = {
       "MEDICAL / CIVILIAN IMPACT: Gaza Ministry of Health (Hamas-controlled — note source), Euro-Med Human Rights Monitor",
       "HOSTAGE / NEGOTIATION TRACK: Ynet, Haaretz, Times of Israel diplomatic track reporting",
     ],
+    evidencePosture: "CONTESTED",
+    confidenceRationale: "The Gaza theater operates under the highest systematic claim-inflation conditions of any current active theater. Both IDF and Hamas overclaim in opposite directions and for distinct political audiences. Gaza Health Ministry figures — the primary civilian death source — are Hamas-administered, introducing a structural credibility constraint. Independent ground truth access is severely restricted for journalists and aid organizations. Confidence in specific casualty counts and operational effectiveness claims is low; theater-level trend assessments carry higher confidence than specific figures.",
+    claimNotes: [
+      "Gaza Ministry of Health casualty totals combine civilian and combatant deaths without disaggregation — IDF claims a separate combatant-specific figure that is not independently verifiable at the stated precision.",
+      "IDF strike effectiveness claims, including tunnel destruction percentages and commander eliminations, frequently cannot be confirmed by independent sources within an operationally relevant timeframe.",
+      "Hostage count, health status, and location distribution are contested across IDF, Hamas, and ICRC reporting — figures diverge and cannot be independently verified.",
+    ],
   },
 
   // ─── LEBANON ─────────────────────────────────────────────────────────────────
@@ -286,6 +310,13 @@ export const THEATERS: Record<string, Theater> = {
       "MILITARY / STRIKE REPORTING: Janes, The Cradle (note pro-resistance frame), NOW Lebanon",
       "HUMANITARIAN / DISPLACEMENT: UNHCR Lebanon, OCHA, Lebanese Red Cross",
       "REGIONAL / IRAN LINKAGE: Iran International, Al-Manar (Hezbollah-affiliated — adversarial frame), Middle East Eye",
+    ],
+    evidencePosture: "LIKELY",
+    confidenceRationale: "Hezbollah losses are partially confirmed through official martyr announcements cross-referenced with ISW and Alma Research tracking. Israeli operational reporting (KIA, equipment) is officially released by IDF with partial OSINT corroboration. The ceasefire framework provides some structural reporting cadence. Overall confidence is moderate — better than Gaza but constrained by Hezbollah opacity on military capacity and Iranian resupply status.",
+    claimNotes: [
+      "Hezbollah precision missile stockpile status following Israeli strikes remains genuinely contested — estimates range from significantly degraded to largely intact depending on the source frame and methodology.",
+      "Iranian resupply volumes through Syrian land corridors are Israeli-claimed as largely interdicted; Hezbollah and Iran maintain adequate replenishment — independent verification is not available.",
+      "UNIFIL reporting on IDF and Hezbollah ground activity in southern Lebanon is diplomatically constrained and does not provide comprehensive independent battlefield assessment.",
     ],
   },
 
@@ -351,6 +382,13 @@ export const THEATERS: Record<string, Theater> = {
       "HUMANITARIAN / DISPLACEMENT: UNHCR Syria, OCHA Syria, IOM displacement tracking",
       "REGIONAL / LOCAL: Syria Direct, Orient News, The New Arab, North Press Agency (Kurdish perspective)",
     ],
+    evidencePosture: "MIXED",
+    confidenceRationale: "Post-transition Syria presents significant attribution challenges. The Assad regime's data infrastructure has collapsed, HTS-controlled areas have restricted independent press access, and the multi-actor environment generates conflicting factional claims. Israeli strike BDA relies on IDF releases and partial OSINT corroboration. ISIS activity in the eastern desert is tracked primarily through attack frequency, not independently verified force assessments. Information confidence is improving from the transition nadir but remains well below the standard of Ukraine or even Yemen.",
+    claimNotes: [
+      "HTS governance statements represent aspirational authority and transitional intent rather than verified operational facts — consolidation status should be cross-checked against independent monitoring.",
+      "ISIS resurgence extent is estimated from SOHR and SDF attack-frequency reporting, not independently verified force size or territorial control assessments.",
+      "Israeli strike BDA in Syria is reported by IDF and partially corroborated by satellite OSINT — the former Syrian government source framework no longer applies as a cross-reference.",
+    ],
   },
 
   // ─── YEMEN ───────────────────────────────────────────────────────────────────
@@ -414,6 +452,13 @@ export const THEATERS: Record<string, Theater> = {
       "WIRE / GLOBAL PRESS: Reuters, AP, Bloomberg (shipping economics), Al Jazeera",
       "STRIKE / MILITARY REPORTING: Janes defense, open-source satellite imagery analysis (Planet Labs / Maxar)",
       "HUMANITARIAN / CIVIL: OCHA Yemen, UNHCR, World Food Programme Yemen country reports",
+    ],
+    evidencePosture: "LIKELY",
+    confidenceRationale: "Maritime incident data is among the most reliably tracked in any current active theater — UKMTO, Lloyd's, Ambrey, and vessel tracking services provide near-real-time confirmed incident data. Houthi strike claims routinely exceed confirmed vessel hits; U.S./UK strike BDA is officially reported and partially corroborated by OSINT. The theater has a strong maritime intelligence layer but weaker land-side force assessment coverage.",
+    claimNotes: [
+      "Houthi missile and drone launch counts significantly exceed confirmed vessel hit counts — interception and miss rates are systematically understated in Houthi public claims.",
+      "U.S. CENTCOM strike BDA is official and partially OSINT-corroborated; Houthi statements consistently minimize damage. The operationally meaningful figure — remaining Houthi launch capacity — is not independently verifiable.",
+      "Yemen humanitarian famine extent estimates rely on WFP and OCHA access-limited assessments — restricted access in Houthi-controlled areas introduces systematic undercounting risk.",
     ],
   },
 
@@ -479,6 +524,13 @@ export const THEATERS: Record<string, Theater> = {
       "OFFICIAL / STATE: SAF spokesperson, Sudan Sovereignty Council, IGAD mediation statements",
       "MEDICAL / HEALTH: WHO Sudan situation reports, MSF field reports, Sudan doctors networks",
     ],
+    evidencePosture: "CONTESTED",
+    confidenceRationale: "Sudan presents the worst evidence environment of any monitored theater. Neither SAF nor RSF publishes meaningful operational data; access restrictions prevent independent verification of atrocity claims, casualty counts, and territorial control across most of Darfur. Humanitarian data — displacement, famine — is more reliably tracked than military data through OCHA, UNHCR, and WFP, but even that data suffers from access limitations. Military evidence confidence in this theater is the lowest of any active conflict in this system.",
+    claimNotes: [
+      "RSF territorial control estimates vary significantly across monitoring organizations — ground truth access in Darfur is severely restricted, and frontline reporting depends primarily on satellite imagery and local networks.",
+      "SAF airstrike civilian casualty figures rely on Sudan doctors networks and ACLED event coding — not independently verified at precision, and likely undercounted due to access restrictions.",
+      "External actor involvement (UAE support for RSF; Egyptian and Eritrean SAF support) is documented by UN panels but officially denied — both governments dispute the characterization of their involvement as direct military support.",
+    ],
   },
 
   // ─── MYANMAR ─────────────────────────────────────────────────────────────────
@@ -542,6 +594,13 @@ export const THEATERS: Record<string, Theater> = {
       "HUMANITARIAN / DISPLACEMENT: UNHCR Myanmar, OCHA, Assistance Association for Political Prisoners (AAPP)",
       "ETHNIC / LOCAL REPORTING: Karen News, Chin Human Rights Organization, Shan Human Rights Foundation",
       "OFFICIAL / ADVERSARIAL: Myanmar junta state media (Global New Light of Myanmar — adversarial propaganda frame)",
+    ],
+    evidencePosture: "MIXED",
+    confidenceRationale: "OSINT through Myanmar Witness, BNI, and resistance-affiliated reporting provides reasonable territorial control tracking; ISP-Myanmar and ACLED provide conservative cross-checks on EAO claims. Junta casualty and equipment figures are treated as propaganda and systematically discounted. Airstrike impact is partially confirmed via satellite imagery. Overall assessment: medium confidence — better than Sudan and DRC, worse than Ukraine, with the junta's information suppression as the primary limiting factor.",
+    claimNotes: [
+      "Junta casualty and equipment loss figures should be treated as propaganda — independent monitoring organizations consistently find higher junta losses than officially stated.",
+      "EAO territorial capture claims are generally directionally accurate but are sometimes inflated on first reporting — ISP-Myanmar and ACLED cross-checks typically confirm a conservative subset of claimed captures within days.",
+      "Chinese diplomatic pressure on northern Brotherhood Alliance EAOs is confirmed in general terms, but exact operational conditions and boundaries of any Chinese-mediated freeze are not publicly verified.",
     ],
   },
 
@@ -607,6 +666,13 @@ export const THEATERS: Record<string, Theater> = {
       "ATROCITY / HUMAN RIGHTS: Human Rights Watch DRC, Amnesty International, UN MONUSCO reporting",
       "REGIONAL / DIPLOMATIC: AU Peace and Security Council statements, ICJ DRC vs. Rwanda proceedings",
     ],
+    evidencePosture: "CONTESTED",
+    confidenceRationale: "Rwandan military involvement is documented by multiple independent UN Group of Experts reports and Western intelligence assessments, but is officially denied by Rwanda — creating a fundamental attribution dispute that affects the framing of virtually all military data in this theater. FARDC casualty and equipment figures are not consistently published. M23 losses are not published. Displacement and humanitarian data are more reliably tracked through OCHA and UNHCR than military data through any source. Rwanda's structured denial creates systematic pressure on the theater's information environment.",
+    claimNotes: [
+      "Rwanda officially denies direct RDF combat involvement in eastern DRC — this denial is contradicted by multiple independent UN Group of Experts reports, Western intelligence assessments, and eyewitness testimony.",
+      "M23 casualty and equipment loss figures are not published — losses are estimated via OCHA event data and conflict monitor reporting with low precision and no independent military verification.",
+      "Mineral revenue capture by M23 and Rwanda in eastern DRC is documented by UN panels but disputed by the Rwandan government — precise volumes and beneficiary breakdown cannot be independently verified.",
+    ],
   },
 
   // ─── TAIWAN ──────────────────────────────────────────────────────────────────
@@ -670,6 +736,13 @@ export const THEATERS: Record<string, Theater> = {
       "MILITARY ANALYSIS: CNAS Taiwan Strait analysis, Michael O'Hanlon (Brookings), Janes PLA order of battle",
       "INTELLIGENCE / WARNING: DoD China Military Power Report (annual), IC Worldwide Threat Assessment",
       "DIPLOMATIC / ECONOMIC: USCC (U.S.-China Economic and Security Review Commission) annual report, Rhodium Group China-Taiwan economic tracking",
+    ],
+    evidencePosture: "LIKELY",
+    confidenceRationale: "As a pre-contact theater, Taiwan presents an intelligence picture built on indicators rather than battle damage. ADIZ incursion data is officially tracked by the Taiwan Ministry of National Defense and is reliable. PLA exercise activity is publicly announced and satellite-observable. Force capability assessments draw from DoD China Military Power reports, RAND analysis, and IISS military balance. Evidence confidence is moderate-to-high on capability; the primary uncertainty is intent and timeline, which cannot be reliably estimated from open-source data alone.",
+    claimNotes: [
+      "PLA readiness timelines vary significantly across Western intelligence and think-tank assessments — 2027, 2035, and 'no hard deadline' all represent credible assessed positions, and none is definitively validated.",
+      "Taiwan's asymmetric defense procurement is fully budgeted but delivery timelines have historically slipped — assessed capability should be distinguished from planned capability on any specific system.",
+      "PRC political signals on Taiwan are issued for multiple domestic and international audiences simultaneously — they should not be read as direct operational indicators without corroborating military posture signals.",
     ],
   },
 };

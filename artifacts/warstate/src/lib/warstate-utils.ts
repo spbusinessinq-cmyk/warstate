@@ -22,12 +22,32 @@ export interface TrendBar {
   opposing: number;
 }
 
+export type ReportMode = "executive" | "analyst" | "escalation" | "daily";
+
+export const REPORT_MODE_LABELS: Record<ReportMode, string> = {
+  executive:  "Executive Brief",
+  analyst:    "Analyst Brief",
+  escalation: "Escalation Memo",
+  daily:      "Daily Theater Update",
+};
+
+export interface SourcePosture {
+  breadth: "NARROW" | "MODERATE" | "BROAD";
+  categories: string[];
+  strength: "LOW" | "MODERATE" | "HIGH";
+  contradictionRisk: boolean;
+  summary: string;
+}
+
 export interface ReportSnapshot {
   theater: Theater;
   runtime: Runtime;
   comparisonRows: [string, string, string, string][];
   trendBars: TrendBar[];
   reportText: string;
+  mode: ReportMode;
+  sourcePosture: SourcePosture;
+  previousReport?: ReportSnapshot | null;
 }
 
 export function buildComparisonRows(theater: Theater): [string, string, string, string][] {
@@ -78,47 +98,239 @@ export function buildTrendBars(theater: Theater): TrendBar[] {
   ];
 }
 
-export function buildReportText(theater: Theater, runtime: Runtime): string {
-  const pad = (label: string, value: string, w = 20) =>
+export function buildReportText(
+  theater: Theater,
+  runtime: Runtime,
+  mode: ReportMode = "analyst",
+  previousReport?: ReportSnapshot | null,
+  sp?: SourcePosture,
+): string {
+  const pad = (label: string, value: string, w = 22) =>
     `${label.padEnd(w)}: ${value}`;
+  const divider  = "==============================================================";
+  const section  = "--------------------------------------------------------------";
+  const spSummary = sp?.summary ?? "Source posture not computed.";
+  const hasDelta  = !!previousReport && previousReport.theater.id === theater.id;
+
+  // ── EXECUTIVE BRIEF ──────────────────────────────────────────────────────
+  if (mode === "executive") {
+    const overview2s = theater.overview.split(". ").slice(0, 2).join(". ") + ".";
+    return [
+      "WARSTATE — EXECUTIVE BRIEF",
+      divider,
+      "",
+      pad("THEATER",        theater.title),
+      pad("CODENAME",       theater.codename),
+      pad("REGION",         theater.region),
+      pad("POSTURE",        runtime.posture),
+      pad("CONFIDENCE",     runtime.confidence),
+      pad("EVIDENCE",       theater.evidencePosture),
+      pad("SOURCE BREADTH", sp?.breadth ?? "—"),
+      pad("TIMESTAMP",      runtime.lastUpdated),
+      pad("CLASSIFICATION", theater.classification),
+      "",
+      section,
+      "CURRENT STATUS",
+      section,
+      runtime.currentStatus,
+      "",
+      section,
+      "SITUATION SUMMARY",
+      section,
+      overview2s,
+      "",
+      section,
+      "KEY ESCALATION DRIVERS",
+      section,
+      ...theater.escalationDrivers.map((d, i) => `  ${i + 1}. ${d}`),
+      "",
+      section,
+      "WATCH PRIORITY",
+      section,
+      ...theater.watchNext.map((w, i) => `  ${i + 1}. ${w}`),
+      "",
+      section,
+      "SOURCE POSTURE",
+      section,
+      `  ${spSummary}`,
+      "",
+      section,
+      "CONFIDENCE NOTE",
+      section,
+      `  ${theater.confidenceRationale}`,
+      "",
+      pad("CLASSIFICATION", theater.classification),
+    ].join("\n");
+  }
+
+  // ── ESCALATION MEMO ──────────────────────────────────────────────────────
+  if (mode === "escalation") {
+    const friendly = theater.friendly;
+    const opposing = theater.opposing;
+    return [
+      "WARSTATE — ESCALATION MEMO",
+      divider,
+      "",
+      pad("THEATER",        theater.title),
+      pad("CODENAME",       theater.codename),
+      pad("POSTURE",        runtime.posture),
+      pad("CONFIDENCE",     runtime.confidence),
+      pad("EVIDENCE",       theater.evidencePosture),
+      pad("TIMESTAMP",      runtime.lastUpdated),
+      pad("CLASSIFICATION", theater.classification),
+      "",
+      section,
+      "TRIGGER ANALYSIS",
+      section,
+      ...theater.escalationDrivers.map((d, i) => `  ${i + 1}. ${d}`),
+      "",
+      section,
+      "RISK INDICATORS",
+      section,
+      ...theater.indicators.slice(0, 3).map((ind, i) => `  ${i + 1}. ${ind}`),
+      "",
+      section,
+      "FORCE POSTURE SUMMARY",
+      section,
+      "",
+      `  ${friendly.label.toUpperCase()}`,
+      `    Equipment losses : ${formatNumber(friendly.equipmentLosses)}`,
+      `    Casualties (est) : ${friendly.casualties}`,
+      `    KIA (est)        : ${friendly.killed}`,
+      "",
+      `  ${opposing.label.toUpperCase()}`,
+      `    Equipment losses : ${formatNumber(opposing.equipmentLosses)}`,
+      `    Casualties (est) : ${opposing.casualties}`,
+      `    KIA (est)        : ${opposing.killed}`,
+      "",
+      section,
+      "IMMEDIATE WATCH ITEMS",
+      section,
+      ...theater.watchNext.map((w, i) => `  ${i + 1}. ${w}`),
+      "",
+      section,
+      "SOURCE NOTE",
+      section,
+      `  ${theater.sourceDiscipline}`,
+      "",
+      `  ${spSummary}`,
+      "",
+      section,
+      "CONFIDENCE / CLAIM POSTURE",
+      section,
+      `  ${theater.confidenceRationale}`,
+      ...(theater.claimNotes.length
+        ? ["", "  CONTESTED ITEMS:", ...theater.claimNotes.map((n) => `    — ${n}`)]
+        : []),
+      "",
+      pad("CLASSIFICATION", theater.classification),
+    ].join("\n");
+  }
+
+  // ── DAILY THEATER UPDATE ─────────────────────────────────────────────────
+  if (mode === "daily") {
+    const deltaLines: string[] = [];
+    if (hasDelta) {
+      deltaLines.push(
+        "",
+        section,
+        `CHANGE SUMMARY  (since ${previousReport!.runtime.lastUpdated})`,
+        section,
+        `  POSTURE     : ${previousReport!.runtime.posture} → ${runtime.posture}`,
+        `  CONFIDENCE  : ${previousReport!.runtime.confidence} → ${runtime.confidence}`,
+        "  SECTOR SHIFTS: review stress indicators for updated bar values",
+      );
+    }
+    return [
+      "WARSTATE — DAILY THEATER UPDATE",
+      divider,
+      "",
+      pad("THEATER",   theater.title),
+      pad("POSTURE",   runtime.posture),
+      pad("TIMESTAMP", runtime.lastUpdated),
+      "",
+      section,
+      "STATUS UPDATE",
+      section,
+      runtime.currentStatus,
+      ...deltaLines,
+      "",
+      section,
+      "TODAY'S WATCH PRIORITY",
+      section,
+      ...theater.watchNext.map((w, i) => `  ${i + 1}. ${w}`),
+      "",
+      section,
+      "KEY INDICATORS (TOP 3)",
+      section,
+      ...theater.indicators.slice(0, 3).map((ind, i) => `  ${i + 1}. ${ind}`),
+      "",
+      section,
+      "SOURCE DISCIPLINE",
+      section,
+      `  ${theater.sourceDiscipline}`,
+      "",
+      pad("CLASSIFICATION", theater.classification),
+    ].join("\n");
+  }
+
+  // ── ANALYST BRIEF (default) ───────────────────────────────────────────────
+  const deltaSection: string[] = [];
+  if (hasDelta) {
+    deltaSection.push(
+      "",
+      section,
+      "WHAT CHANGED",
+      section,
+      `  This report is compared against snapshot from ${previousReport!.runtime.lastUpdated}.`,
+      `  POSTURE     : ${previousReport!.runtime.posture} → ${runtime.posture}`,
+      `  CONFIDENCE  : ${previousReport!.runtime.confidence} → ${runtime.confidence}`,
+      "  SECTOR PRESSURE: review stress bars for shifts since prior snapshot",
+      ...(previousReport!.theater.id !== theater.id
+        ? [`  NOTE: Prior snapshot was from a different theater (${previousReport!.theater.short}). Comparison is cross-theater.`]
+        : []),
+    );
+  }
 
   return [
-    "WARSTATE — FIELD STATUS REPORT",
-    "==============================================================",
+    "WARSTATE — ANALYST BRIEF",
+    divider,
     "",
-    pad("PRODUCT", `WARSTATE / ${theater.codename}`),
-    pad("THEATER", theater.title),
-    pad("DISPLAY NAME", theater.short),
-    pad("REGION", theater.region),
+    pad("PRODUCT",        `WARSTATE / ${theater.codename}`),
+    pad("THEATER",        theater.title),
+    pad("DISPLAY NAME",   theater.short),
+    pad("REGION",         theater.region),
     pad("CLASSIFICATION", theater.classification),
-    pad("POSTURE", runtime.posture),
-    pad("CONFIDENCE", runtime.confidence),
-    pad("LAST REFRESH", runtime.lastUpdated),
-    pad("SOURCE DISCIPLINE", theater.sourceDiscipline),
+    pad("POSTURE",        runtime.posture),
+    pad("CONFIDENCE",     runtime.confidence),
+    pad("EVIDENCE",       theater.evidencePosture),
+    pad("SOURCE BREADTH", sp?.breadth ?? "—"),
+    pad("LAST REFRESH",   runtime.lastUpdated),
     "",
-    "--------------------------------------------------------------",
+    section,
     "CURRENT STATUS",
-    "--------------------------------------------------------------",
+    section,
     runtime.currentStatus,
     "",
-    "--------------------------------------------------------------",
+    section,
     "EXECUTIVE OVERVIEW",
-    "--------------------------------------------------------------",
+    section,
     theater.overview,
     "",
-    "--------------------------------------------------------------",
+    section,
     "ESCALATION DRIVERS",
-    "--------------------------------------------------------------",
+    section,
     ...theater.escalationDrivers.map((item, idx) => `  ${idx + 1}. ${item}`),
     "",
-    "--------------------------------------------------------------",
+    section,
     "WATCH NEXT",
-    "--------------------------------------------------------------",
+    section,
     ...theater.watchNext.map((item, idx) => `  ${idx + 1}. ${item}`),
+    ...deltaSection,
     "",
-    "--------------------------------------------------------------",
+    section,
     "FORCE LEDGER",
-    "--------------------------------------------------------------",
+    section,
     "",
     `  ${theater.friendly.label.toUpperCase()}`,
     `    Equipment losses : ${formatNumber(theater.friendly.equipmentLosses)}`,
@@ -134,15 +346,34 @@ export function buildReportText(theater: Theater, runtime: Runtime): string {
     `    Casualties (est) : ${theater.opposing.casualties}`,
     `    KIA (est)        : ${theater.opposing.killed}`,
     "",
-    "--------------------------------------------------------------",
+    section,
     "PRIORITY INDICATORS",
-    "--------------------------------------------------------------",
+    section,
     ...theater.indicators.map((item, idx) => `  ${idx + 1}. ${item}`),
     "",
-    "--------------------------------------------------------------",
+    section,
     "SOURCE STACK",
-    "--------------------------------------------------------------",
+    section,
     ...theater.sources.map((item, idx) => `  ${idx + 1}. ${item}`),
+    "",
+    section,
+    "CONFIDENCE RATIONALE",
+    section,
+    `  ${theater.confidenceRationale}`,
+    "",
+    section,
+    "SOURCE POSTURE",
+    section,
+    `  ${spSummary}`,
+    ...(theater.claimNotes.length
+      ? [
+          "",
+          section,
+          "CLAIM / CONTEST NOTES",
+          section,
+          ...theater.claimNotes.map((n, i) => `  ${i + 1}. ${n}`),
+        ]
+      : []),
   ].join("\n");
 }
 
@@ -154,6 +385,98 @@ export function parseCategory(str: string, maxLen = 55): { category: string | nu
   return {
     category: has ? str.slice(0, ci).trim() : null,
     detail: has ? str.slice(ci + 1).trim() : str,
+  };
+}
+
+// Derives source breadth, strength, and contradiction risk from the theater's
+// sources array using the "CATEGORY: ..." prefix convention.
+export function buildSourcePosture(theater: Theater): SourcePosture {
+  const cats = theater.sources
+    .map(s => parseCategory(s, 40).category)
+    .filter(Boolean) as string[];
+  const uniqueCats = [...new Set(cats)];
+  const count = uniqueCats.length;
+  const breadth: SourcePosture["breadth"] = count >= 5 ? "BROAD" : count >= 3 ? "MODERATE" : "NARROW";
+  const strength: SourcePosture["strength"] = breadth === "BROAD" ? "HIGH" : breadth === "MODERATE" ? "MODERATE" : "LOW";
+  const contradictionRisk = theater.sources.some(s => {
+    const lower = s.toLowerCase();
+    return lower.includes("adversarial") || lower.includes("denial") || lower.includes("disputed");
+  });
+  const breadthNote =
+    breadth === "BROAD"   ? "Source coverage is broad and multi-disciplinary." :
+    breadth === "MODERATE" ? "Source coverage is moderate." :
+    "Source coverage is narrow — corroboration limited.";
+  const contrNote = contradictionRisk
+    ? " Adversarial or structurally compromised sources present — cross-reference required before treating claims as baseline."
+    : "";
+  const summary = `${count} source categories active (${uniqueCats.join(", ")}). ${breadthNote}${contrNote}`;
+  return { breadth, categories: uniqueCats, strength, contradictionRisk, summary };
+}
+
+// Builds the structured JSON payload for the JSON export.
+export function buildJsonPayload(snapshot: ReportSnapshot): object {
+  const sp = snapshot.sourcePosture;
+  const prev = snapshot.previousReport;
+  return {
+    meta: {
+      product: "WARSTATE",
+      reportMode: snapshot.mode,
+      reportModeLabel: REPORT_MODE_LABELS[snapshot.mode],
+      generatedAt: new Date().toISOString(),
+      reportTimestamp: snapshot.runtime.lastUpdated,
+    },
+    theater: {
+      id: snapshot.theater.id,
+      short: snapshot.theater.short,
+      title: snapshot.theater.title,
+      codename: snapshot.theater.codename,
+      region: snapshot.theater.region,
+      classification: snapshot.theater.classification,
+    },
+    intelligence: {
+      posture: snapshot.runtime.posture,
+      confidence: snapshot.runtime.confidence,
+      evidencePosture: snapshot.theater.evidencePosture,
+      sourcePosture: {
+        breadth: sp.breadth,
+        strength: sp.strength,
+        categories: sp.categories,
+        contradictionRisk: sp.contradictionRisk,
+        summary: sp.summary,
+      },
+      sourceDiscipline: snapshot.theater.sourceDiscipline,
+    },
+    assessment: {
+      currentStatus: snapshot.runtime.currentStatus,
+      executiveOverview: snapshot.theater.overview,
+      escalationDrivers: snapshot.theater.escalationDrivers,
+      mainRisks: snapshot.theater.escalationDrivers,
+      watchNext: snapshot.theater.watchNext,
+    },
+    confidence: {
+      posture: snapshot.theater.evidencePosture,
+      rationale: snapshot.theater.confidenceRationale,
+      claimNotes: snapshot.theater.claimNotes,
+    },
+    indicators: snapshot.theater.indicators,
+    forceLedger: {
+      friendly: snapshot.theater.friendly,
+      opposing: snapshot.theater.opposing,
+    },
+    sectorStress: snapshot.runtime.sectors,
+    attrition: snapshot.trendBars,
+    sources: snapshot.theater.sources,
+    delta: prev
+      ? {
+          previousTheaterId:  prev.theater.id,
+          previousTheaterName: prev.theater.short,
+          previousPosture:    prev.runtime.posture,
+          previousConfidence: prev.runtime.confidence,
+          previousTimestamp:  prev.runtime.lastUpdated,
+          postureChanged:     prev.runtime.posture !== snapshot.runtime.posture,
+          confidenceChanged:  prev.runtime.confidence !== snapshot.runtime.confidence,
+        }
+      : null,
   };
 }
 
@@ -550,38 +873,46 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
   rule();
   y += 16;
 
-  // ── Summary metadata cells (4 cells) ─────────────────────────────────────
-  const cellW = Math.floor(CW / 4);
+  // ── Summary metadata cells (6 cells in 2 rows of 3) ──────────────────────
+  const cellW = Math.floor(CW / 3);
   const cellH = 44;
   const summaryMeta = [
-    { label: "THEATER",        value: source.theater.short },
-    { label: "POSTURE",        value: source.runtime.posture },
-    { label: "CONFIDENCE",     value: source.runtime.confidence },
-    { label: "CLASSIFICATION", value: source.theater.classification },
+    { label: "THEATER",         value: source.theater.short },
+    { label: "POSTURE",         value: source.runtime.posture },
+    { label: "CONFIDENCE",      value: source.runtime.confidence },
+    { label: "EVIDENCE POSTURE", value: source.theater.evidencePosture },
+    { label: "SOURCE BREADTH",  value: source.sourcePosture.breadth },
+    { label: "REPORT MODE",     value: REPORT_MODE_LABELS[source.mode] },
   ];
 
-  summaryMeta.forEach((item, i) => {
-    const bx = ML + i * cellW;
-    const bw = i === summaryMeta.length - 1 ? CW - i * cellW : cellW; // last cell fills to edge
-    doc.setFillColor(...COL_FILL_A);
-    doc.setDrawColor(...COL_RULE);
-    doc.setLineWidth(0.4);
-    doc.rect(bx, y, bw, cellH, "FD");
-    // Label
-    doc.setFont("courier", "bold");
-    doc.setFontSize(6.5);
-    doc.setTextColor(...COL_MUTED);
-    doc.text(item.label, bx + 7, y + 13);
-    // Value — wrap within cell
-    doc.setFont("courier", "bold");
-    doc.setFontSize(8.5);
-    doc.setTextColor(...COL_DARK);
-    const valLines = doc.splitTextToSize(item.value, bw - 14) as string[];
-    valLines.slice(0, 2).forEach((line: string, li: number) => {
-      doc.text(line, bx + 7, y + 26 + li * 11);
-    });
-  });
-  y += cellH + 24;
+  // Render 2 rows of 3 cells each
+  const COLS = 3;
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const i = row * COLS + col;
+      if (i >= summaryMeta.length) break;
+      const item = summaryMeta[i];
+      const bx = ML + col * cellW;
+      const bw = col === COLS - 1 ? CW - col * cellW : cellW;
+      const by = y + row * cellH;
+      doc.setFillColor(...COL_FILL_A);
+      doc.setDrawColor(...COL_RULE);
+      doc.setLineWidth(0.4);
+      doc.rect(bx, by, bw, cellH, "FD");
+      doc.setFont("courier", "bold");
+      doc.setFontSize(6.5);
+      doc.setTextColor(...COL_MUTED);
+      doc.text(item.label, bx + 7, by + 13);
+      doc.setFont("courier", "bold");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...COL_DARK);
+      const valLines = doc.splitTextToSize(item.value, bw - 14) as string[];
+      valLines.slice(0, 2).forEach((line: string, li: number) => {
+        doc.text(line, bx + 7, by + 26 + li * 11);
+      });
+    }
+  }
+  y += cellH * 2 + 20;
 
   // ── 1. Current Status ─────────────────────────────────────────────────────
   sectionHeader("1.  Current Status");
@@ -713,6 +1044,55 @@ export function renderPDFReport(doc: any, source: ReportSnapshot): void {
 
     y += 6;  // inter-group gap
   });
+
+  // ── 10. What Changed (only if previousReport present) ────────────────────
+  if (source.previousReport) {
+    const prev = source.previousReport;
+    const sameTheater = prev.theater.id === source.theater.id;
+    sectionHeader("10. What Changed");
+    paragraph(
+      `Compared against snapshot from ${prev.runtime.lastUpdated}.${
+        !sameTheater ? ` Note: prior snapshot was for ${prev.theater.short} — cross-theater comparison.` : ""
+      }`,
+      { size: 8.5, lineH: 12, color: COL_MUTED }
+    );
+    const changeRows: [string, string][] = [
+      ["POSTURE",     `${prev.runtime.posture}  →  ${source.runtime.posture}`],
+      ["CONFIDENCE",  `${prev.runtime.confidence}  →  ${source.runtime.confidence}`],
+      ["EVIDENCE",    `${prev.theater.evidencePosture}  →  ${source.theater.evidencePosture}`],
+    ];
+    changeRows.forEach(([lbl, val], idx) => {
+      kvRow(lbl, val, idx % 2 === 0);
+    });
+    doc.setDrawColor(...COL_RULE);
+    doc.setLineWidth(0.4);
+    doc.line(ML, y, ML + CW, y);
+    y += 10;
+    paragraph("Sector stress values: compare current bars to prior snapshot for shift direction.", {
+      size: 8, lineH: 12, color: COL_MUTED, indent: 8,
+    });
+  }
+
+  // ── 11. Confidence Rationale ──────────────────────────────────────────────
+  const confSectionNum = source.previousReport ? "11." : "10.";
+  sectionHeader(`${confSectionNum} Confidence Rationale`);
+  paragraph(source.theater.confidenceRationale, { size: 8.5, lineH: 12.5 });
+  if (source.theater.claimNotes.length) {
+    y += 8;
+    doc.setFont("courier", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...COL_MUTED);
+    doc.text("CONTESTED / CLAIM NOTES", ML, y);
+    y += 10;
+    source.theater.claimNotes.forEach((note, idx) => {
+      numberedItem(idx, note, { indent: 8, size: 8, lineH: 12, gap: 4 });
+    });
+  }
+
+  // ── 12. Source Posture ────────────────────────────────────────────────────
+  const srcSectionNum = source.previousReport ? "12." : "11.";
+  sectionHeader(`${srcSectionNum} Source Posture`);
+  paragraph(source.sourcePosture.summary, { size: 8.5, lineH: 12.5 });
 
   // ── Footer on every page ──────────────────────────────────────────────────
   const totalPages: number = (doc.internal as any).getNumberOfPages();

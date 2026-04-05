@@ -1,0 +1,280 @@
+WARSTATE — REPORT INTELLIGENCE ENGINE UPGRADE
+
+Do not redesign the whole app.
+Do not remove current working systems.
+Do not break theater switching, report snapshot logic, or export actions.
+
+OBJECTIVE:
+Upgrade WARSTATE from a battlefield viewer/report shell into a real report-production engine.
+
+WARSTATE is report-first.
+No maps.
+No geographic overlays.
+No flashy extras.
+The focus is:
+1. evidence-graded reporting
+2. stronger narrative synthesis
+3. better report generation quality
+
+Implement this as a serious internal intelligence production upgrade.
+
+━━━━━━━━━━━━━━━━━━
+MISSION
+━━━━━━━━━━━━━━━━━━
+
+Turn WARSTATE into a system that can:
+- compile a theater report more intelligently
+- explain confidence better
+- separate facts from claims
+- track what changed since last report
+- synthesize multi-source reporting into cleaner brief language
+- produce stronger analyst-grade report outputs
+
+Keep WARSTATE as one unified system:
+Select theater → review status → generate report → export report
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — EVIDENCE GRADING SYSTEM
+━━━━━━━━━━━━━━━━━━
+
+Add a real evidence/confidence model to the reporting pipeline.
+
+For every theater, introduce structured evidence grading concepts such as:
+- CONFIRMED
+- LIKELY
+- CONTESTED
+- UNKNOWN
+
+Requirements:
+1. Add a report-level evidence posture
+2. Add source-confidence reasoning
+3. Add “why this confidence” logic in the report
+4. Make confidence feel earned, not decorative
+5. Distinguish between:
+   - confirmed facts
+   - claims by participants
+   - estimates
+   - unresolved reporting
+
+Do not fake live sourcing.
+Do not invent new external feeds.
+Use the current theater model and make the logic/reporting structure smarter.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — SOURCE WEIGHTING + SOURCE STACK UPGRADE
+━━━━━━━━━━━━━━━━━━
+
+Make source handling much stronger.
+
+Rebuild source architecture so each theater can support:
+- Official / State
+- Wire / Global Press
+- Conflict Monitor / Tracker
+- Military / Strike Reporting
+- Humanitarian / Displacement
+- Maritime / Infrastructure / Logistics
+- Regional / Local Reporting
+- Warning / Indicator Model
+
+Add logic so the report can express:
+- source breadth
+- source strength
+- source confidence
+- contradiction risk
+- whether the current report is based on narrow or broad source coverage
+
+Add a cleaner “Source Posture” concept to the generated report.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — REPORT SYNTHESIS ENGINE
+━━━━━━━━━━━━━━━━━━
+
+Upgrade the writing logic.
+
+The generated report should stop feeling like a static dump of theater fields.
+
+Build a more structured synthesis layer that generates:
+1. Current Status
+2. Executive Overview
+3. Key Drivers
+4. Main Risks
+5. What Changed
+6. What To Watch Next
+7. Source Posture
+8. Confidence Rationale
+
+Requirements:
+- tighter analyst tone
+- less vague wording
+- less repetitive phrasing
+- more useful strategic summary
+- better distinction between fact and interpretation
+
+Target tone:
+internal strategic analyst brief
+calm
+cold
+structured
+useful
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — “WHAT CHANGED” REPORTING
+━━━━━━━━━━━━━━━━━━
+
+Add a report-delta concept.
+
+When a report is generated, the system should be able to support:
+- what changed since the prior snapshot
+- posture increase / decrease
+- confidence increase / decrease
+- sector pressure increase / decrease
+- any shift in key indicators
+
+You do not need live backend history yet,
+but structure the app so a prior generated snapshot can be compared to the current one.
+
+At minimum:
+- support comparison against the previous generated report
+- generate a “What Changed” section if a prior snapshot exists
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — CONTRADICTION / CLAIM HANDLING
+━━━━━━━━━━━━━━━━━━
+
+Add better logic for uncertain reporting.
+
+Introduce a clearer report behavior for cases where:
+- exact force numbers are mixed
+- casualty counts conflict
+- official statements conflict with reporting
+- battlefield claims are unresolved
+
+Add a section or tags for:
+- Claims
+- Confirmed
+- Contested
+- Estimate-based inputs
+
+This should make WARSTATE feel smarter and more honest.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — REPORT MODE SYSTEM
+━━━━━━━━━━━━━━━━━━
+
+Add report modes so WARSTATE can generate different report styles from the same theater.
+
+Add at least these modes:
+1. Executive Brief
+2. Analyst Brief
+3. Escalation Memo
+4. Daily Theater Update
+
+Requirements:
+- mode should affect emphasis and structure
+- keep the system clean
+- do not break current export flows
+- do not clutter the UI
+
+You may implement mode selection in a compact way near Generate Report or in the report modal.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — REPORT OUTPUT UPGRADE
+━━━━━━━━━━━━━━━━━━
+
+Upgrade the generated report content structure in:
+- modal preview
+- TXT export
+- JSON export
+- PDF export
+- print output
+
+The report should now feel like a real intelligence product.
+
+Required high-level report structure:
+1. Title block
+2. Theater metadata
+3. Current Status
+4. Executive Overview
+5. Key Drivers
+6. Main Risks
+7. What Changed
+8. Priority Indicators
+9. Force Ledger
+10. Source Posture
+11. Confidence Rationale
+12. Watch Items
+
+If some sections are unavailable, handle that gracefully.
+Do not break layout.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 8 — UI INTEGRATION
+━━━━━━━━━━━━━━━━━━
+
+Integrate the upgrade cleanly into the current WARSTATE interface.
+
+Add only what is needed:
+- evidence posture display
+- source posture display
+- report mode selection
+- change summary
+- confidence rationale display
+- stronger report module feel
+
+Do not clutter the screen.
+Do not do a giant redesign.
+Keep the current WARSTATE system intact.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 9 — JSON EXPORT IMPROVEMENT
+━━━━━━━━━━━━━━━━━━
+
+Upgrade JSON export so it becomes genuinely useful.
+
+Include:
+- theater metadata
+- posture
+- confidence
+- evidence posture
+- source posture
+- current status
+- executive overview
+- key drivers
+- risks
+- what changed
+- indicators
+- ledger
+- report mode
+- timestamp
+
+Make the JSON export feel like a real structured intelligence payload.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 10 — VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After implementing:
+- run full build
+- confirm no syntax/runtime errors
+- confirm theater switching still works
+- confirm Generate Report still works
+- confirm report snapshot still works
+- confirm PDF/TXT/JSON exports still work
+- confirm Copy Brief still works
+- confirm Print Report still works
+- confirm new report sections render correctly
+- confirm WARSTATE feels significantly more intelligent and useful
+
+RETURN EXACTLY:
+1. Evidence grading changes made
+2. Source/posture changes made
+3. Report synthesis changes made
+4. New report modes added
+5. Export/report output changes made
+6. Functionality validated
+7. Any remaining limitations
+
+IMPORTANT:
+Do the work in code.
+Do not just describe the work.
+Implement the upgrade.

@@ -5,12 +5,16 @@ import {
   buildComparisonRows,
   buildTrendBars,
   buildReportText,
+  buildSourcePosture,
+  buildJsonPayload,
   downloadFile,
   copyToClipboard,
   openPrintWindow,
   renderPDFReport,
   parseCategory,
   ReportSnapshot,
+  ReportMode,
+  REPORT_MODE_LABELS,
 } from "@/lib/warstate-utils";
 import { ReportModal } from "@/components/warstate/ReportModal";
 import { ManualCopyModal } from "@/components/warstate/ManualCopyModal";
@@ -43,6 +47,8 @@ export default function Warstate() {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [reportOpen, setReportOpen] = useState(false);
   const [generatedReport, setGeneratedReport] = useState<ReportSnapshot | null>(null);
+  const [previousReport, setPreviousReport] = useState<ReportSnapshot | null>(null);
+  const [reportMode, setReportMode] = useState<ReportMode>("analyst");
   const [refreshCount, setRefreshCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -85,10 +91,21 @@ export default function Warstate() {
 
   const comparisonRows = useMemo(() => buildComparisonRows(theater), [theater]);
   const trendBars = useMemo(() => buildTrendBars(theater), [theater]);
-  const reportText = useMemo(() => buildReportText(theater, runtime), [theater, runtime]);
+  const sourcePosture = useMemo(() => buildSourcePosture(theater), [theater]);
+  const reportText = useMemo(
+    () => buildReportText(theater, runtime, reportMode, previousReport, sourcePosture),
+    [theater, runtime, reportMode, previousReport, sourcePosture],
+  );
 
   const activeReport: ReportSnapshot = generatedReport ?? {
-    theater, runtime, comparisonRows, trendBars, reportText,
+    theater,
+    runtime,
+    comparisonRows,
+    trendBars,
+    reportText,
+    mode: reportMode,
+    sourcePosture,
+    previousReport,
   };
 
   const handleRefresh = async () => {
@@ -101,10 +118,20 @@ export default function Warstate() {
   };
 
   const handleGenerateReport = () => {
-    const snapshot: ReportSnapshot = { theater, runtime, comparisonRows, trendBars, reportText };
+    const snapshot: ReportSnapshot = {
+      theater,
+      runtime,
+      comparisonRows,
+      trendBars,
+      reportText,
+      mode: reportMode,
+      sourcePosture,
+      previousReport,
+    };
+    setPreviousReport(generatedReport);
     setGeneratedReport(snapshot);
     setReportOpen(true);
-    setToast("Report generated and locked");
+    setToast(`${REPORT_MODE_LABELS[reportMode]} generated and locked`);
   };
 
   const handleExportPDF = async () => {
@@ -134,20 +161,7 @@ export default function Warstate() {
   };
 
   const handleExportJSON = () => {
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      theater: activeReport.theater.title,
-      codename: activeReport.theater.codename,
-      posture: activeReport.runtime.posture,
-      confidence: activeReport.runtime.confidence,
-      lastRefresh: activeReport.runtime.lastUpdated,
-      currentStatus: activeReport.runtime.currentStatus,
-      classification: activeReport.theater.classification,
-      sourceDiscipline: activeReport.theater.sourceDiscipline,
-      data: activeReport.theater,
-      sectors: activeReport.runtime.sectors,
-      trendBars: activeReport.trendBars,
-    };
+    const payload = buildJsonPayload(activeReport);
     downloadFile(
       `warstate-${activeReport.theater.id}.json`,
       JSON.stringify(payload, null, 2),
@@ -314,6 +328,26 @@ export default function Warstate() {
                 </div>
                 <div className="px-4 pt-4 pb-4 space-y-3">
 
+                  {/* Report Mode Selector */}
+                  <div>
+                    <div className="text-[7px] uppercase tracking-[0.32em] text-[#374650] mb-1.5">Report Mode</div>
+                    <div className="grid grid-cols-4 gap-1">
+                      {(["executive", "analyst", "escalation", "daily"] as ReportMode[]).map((m) => (
+                        <button
+                          key={m}
+                          onClick={() => setReportMode(m)}
+                          className={`px-2 py-2 border text-[8px] uppercase tracking-[0.18em] transition-colors ${
+                            reportMode === m
+                              ? "border-[#265c42] bg-[#061018] text-[#5ec998]"
+                              : "border-[#121e28] bg-[#050810] text-[#374650] hover:border-[#1e2d38] hover:text-[#4e6472]"
+                          }`}
+                        >
+                          {m === "executive" ? "Exec" : m === "analyst" ? "Analyst" : m === "escalation" ? "Escalation" : "Daily"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Primary CTA */}
                   <button
                     onClick={handleGenerateReport}
@@ -432,12 +466,31 @@ export default function Warstate() {
                       <div className="text-[12px] text-[#c8d6de]">{runtime.confidence}</div>
                     </div>
                     <div className="px-4 py-3 bg-[#050810]">
+                      <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Evidence Posture</div>
+                      <div className={`text-[12px] font-semibold ${
+                        theater.evidencePosture === "CONFIRMED" ? "text-[#5ec998]" :
+                        theater.evidencePosture === "LIKELY"    ? "text-[#8abbd0]" :
+                        theater.evidencePosture === "CONTESTED" ? "text-[#c8884e]" :
+                        "text-[#7a8e9a]"
+                      }`}>{theater.evidencePosture}</div>
+                    </div>
+                    <div className="px-4 py-3 bg-[#050810]">
+                      <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Source Breadth</div>
+                      <div className={`text-[12px] font-semibold ${
+                        sourcePosture.breadth === "BROAD"    ? "text-[#5ec998]" :
+                        sourcePosture.breadth === "MODERATE" ? "text-[#8abbd0]" :
+                        "text-[#c8884e]"
+                      }`}>{sourcePosture.breadth}</div>
+                    </div>
+                    <div className="px-4 py-3 bg-[#050810]">
                       <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Refresh Count</div>
                       <div className="text-[12px] text-[#c8d6de] tabular-nums">{refreshCount}</div>
                     </div>
                     <div className="px-4 py-3 bg-[#050810]">
-                      <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Engine</div>
-                      <div className="text-[12px] text-[#c8d6de]">REPORT CORE</div>
+                      <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Contra. Risk</div>
+                      <div className={`text-[12px] font-semibold ${sourcePosture.contradictionRisk ? "text-[#c8884e]" : "text-[#5ec998]"}`}>
+                        {sourcePosture.contradictionRisk ? "PRESENT" : "NONE FLAGGED"}
+                      </div>
                     </div>
                   </div>
                 </div>
