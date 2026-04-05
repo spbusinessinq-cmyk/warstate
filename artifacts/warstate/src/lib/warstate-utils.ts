@@ -39,6 +39,35 @@ export interface SourcePosture {
   summary: string;
 }
 
+export interface SectorDelta {
+  name: string;
+  prev: number;
+  curr: number;
+  delta: number;
+  direction: "UP" | "DOWN" | "FLAT";
+}
+
+export interface DeltaAnalysis {
+  isSameTheater: boolean;
+  postureChanged: boolean;
+  confidenceChanged: boolean;
+  evidenceChanged: boolean;
+  posturePrev: string;
+  postureCurr: string;
+  confidencePrev: string;
+  confidenceCurr: string;
+  evidencePrev: string;
+  evidenceCurr: string;
+  sectorDeltas: SectorDelta[];
+  topMovedSector: SectorDelta | null;
+  sourcePostureShift: boolean;
+  anyChange: boolean;
+  analystSummary: string;
+  priorTimestamp: string;
+  priorTheater: string;
+  priorMode: ReportMode;
+}
+
 export interface ReportSnapshot {
   theater: Theater;
   runtime: Runtime;
@@ -47,7 +76,79 @@ export interface ReportSnapshot {
   reportText: string;
   mode: ReportMode;
   sourcePosture: SourcePosture;
+  generatedAt?: string;
   previousReport?: ReportSnapshot | null;
+}
+
+export function buildDeltaAnalysis(current: ReportSnapshot, previous: ReportSnapshot): DeltaAnalysis {
+  const isSameTheater = current.theater.id === previous.theater.id;
+  const postureChanged    = current.runtime.posture    !== previous.runtime.posture;
+  const confidenceChanged = current.runtime.confidence !== previous.runtime.confidence;
+  const evidenceChanged   = current.theater.evidencePosture !== previous.theater.evidencePosture;
+
+  const sectorDeltas: SectorDelta[] = [];
+  if (isSameTheater) {
+    for (const curr of current.runtime.sectors) {
+      const prev = previous.runtime.sectors.find(s => s.name === curr.name);
+      if (prev) {
+        const delta = curr.value - prev.value;
+        sectorDeltas.push({
+          name: curr.name,
+          prev: prev.value,
+          curr: curr.value,
+          delta,
+          direction: delta > 1 ? "UP" : delta < -1 ? "DOWN" : "FLAT",
+        });
+      }
+    }
+  }
+
+  const topMovedSector = sectorDeltas.length > 0
+    ? sectorDeltas.reduce((a, b) => Math.abs(b.delta) > Math.abs(a.delta) ? b : a)
+    : null;
+
+  const sourcePostureShift =
+    current.sourcePosture.breadth           !== previous.sourcePosture.breadth ||
+    current.sourcePosture.contradictionRisk !== previous.sourcePosture.contradictionRisk ||
+    current.sourcePosture.strength          !== previous.sourcePosture.strength;
+
+  const anyChange = postureChanged || confidenceChanged || evidenceChanged ||
+    sectorDeltas.some(s => s.direction !== "FLAT") || sourcePostureShift;
+
+  const changes: string[] = [];
+  if (postureChanged)    changes.push(`posture shifted ${previous.runtime.posture} → ${current.runtime.posture}`);
+  if (confidenceChanged) changes.push(`confidence moved ${previous.runtime.confidence} → ${current.runtime.confidence}`);
+  if (evidenceChanged)   changes.push(`evidence grade changed ${previous.theater.evidencePosture} → ${current.theater.evidencePosture}`);
+  if (topMovedSector && topMovedSector.direction !== "FLAT") {
+    const dir = topMovedSector.direction === "UP" ? "elevated" : "reduced";
+    changes.push(`${topMovedSector.name} sector stress ${dir} by ${Math.abs(topMovedSector.delta)} pts`);
+  }
+  if (sourcePostureShift) changes.push("source posture characteristics shifted");
+
+  const analystSummary = changes.length > 0
+    ? `Since prior snapshot: ${changes.join("; ")}.`
+    : "No material changes detected since prior snapshot.";
+
+  return {
+    isSameTheater,
+    postureChanged,
+    confidenceChanged,
+    evidenceChanged,
+    posturePrev: previous.runtime.posture,
+    postureCurr: current.runtime.posture,
+    confidencePrev: previous.runtime.confidence,
+    confidenceCurr: current.runtime.confidence,
+    evidencePrev: previous.theater.evidencePosture,
+    evidenceCurr: current.theater.evidencePosture,
+    sectorDeltas,
+    topMovedSector,
+    sourcePostureShift,
+    anyChange,
+    analystSummary,
+    priorTimestamp: previous.generatedAt ?? previous.runtime.lastUpdated,
+    priorTheater:   previous.theater.short,
+    priorMode:      previous.mode,
+  };
 }
 
 export function buildComparisonRows(theater: Theater): [string, string, string, string][] {
@@ -107,87 +208,104 @@ export function buildReportText(
 ): string {
   const pad = (label: string, value: string, w = 22) =>
     `${label.padEnd(w)}: ${value}`;
-  const divider  = "==============================================================";
-  const section  = "--------------------------------------------------------------";
+  const divider = "==============================================================";
+  const section = "--------------------------------------------------------------";
   const spSummary = sp?.summary ?? "Source posture not computed.";
-  const hasDelta  = !!previousReport && previousReport.theater.id === theater.id;
+  const hasDelta = !!previousReport;
+  const sameTh = hasDelta && previousReport!.theater.id === theater.id;
 
-  // ── EXECUTIVE BRIEF ──────────────────────────────────────────────────────
+  // ── EXECUTIVE BRIEF — leadership-facing, strict brevity ──────────────────
   if (mode === "executive") {
-    const overview2s = theater.overview.split(". ").slice(0, 2).join(". ") + ".";
+    const lead2 = theater.overview.split(". ").slice(0, 2).join(". ") + ".";
+    const top2Drivers = theater.escalationDrivers.slice(0, 2);
+    const top2Watch = theater.watchNext.slice(0, 2);
     return [
-      "WARSTATE — EXECUTIVE BRIEF",
+      "WARSTATE  //  EXECUTIVE BRIEF",
       divider,
       "",
-      pad("THEATER",        theater.title),
-      pad("CODENAME",       theater.codename),
-      pad("REGION",         theater.region),
-      pad("POSTURE",        runtime.posture),
-      pad("CONFIDENCE",     runtime.confidence),
-      pad("EVIDENCE",       theater.evidencePosture),
-      pad("SOURCE BREADTH", sp?.breadth ?? "—"),
-      pad("TIMESTAMP",      runtime.lastUpdated),
-      pad("CLASSIFICATION", theater.classification),
+      pad("THEATER",    theater.title),
+      pad("POSTURE",    runtime.posture),
+      pad("CONFIDENCE", runtime.confidence),
+      pad("EVIDENCE",   theater.evidencePosture),
+      pad("TIMESTAMP",  runtime.lastUpdated),
       "",
       section,
-      "CURRENT STATUS",
+      "SITUATION",
       section,
-      runtime.currentStatus,
+      lead2,
       "",
       section,
-      "SITUATION SUMMARY",
+      "PRIMARY ESCALATION RISKS",
       section,
-      overview2s,
+      ...top2Drivers.map((d, i) => `  ${i + 1}. ${d}`),
       "",
       section,
-      "KEY ESCALATION DRIVERS",
+      "ACTION WATCH",
       section,
-      ...theater.escalationDrivers.map((d, i) => `  ${i + 1}. ${d}`),
-      "",
-      section,
-      "WATCH PRIORITY",
-      section,
-      ...theater.watchNext.map((w, i) => `  ${i + 1}. ${w}`),
-      "",
-      section,
-      "SOURCE POSTURE",
-      section,
-      `  ${spSummary}`,
+      ...top2Watch.map((w, i) => `  ${i + 1}. ${w}`),
       "",
       section,
       "CONFIDENCE NOTE",
       section,
+      `  Evidence: ${theater.evidencePosture}  |  Sources: ${sp?.breadth ?? "—"}  |  Contradiction risk: ${sp?.contradictionRisk ? "PRESENT" : "NONE"}`,
       `  ${theater.confidenceRationale}`,
       "",
       pad("CLASSIFICATION", theater.classification),
     ].join("\n");
   }
 
-  // ── ESCALATION MEMO ──────────────────────────────────────────────────────
+  // ── ESCALATION MEMO — trigger-led, risk-focused ───────────────────────────
   if (mode === "escalation") {
     const friendly = theater.friendly;
     const opposing = theater.opposing;
+    const deltaLines: string[] = [];
+    if (hasDelta) {
+      const prev = previousReport!;
+      const postureNote = prev.runtime.posture !== runtime.posture
+        ? `  POSTURE     : ${prev.runtime.posture} → ${runtime.posture}  [CHANGED]`
+        : `  POSTURE     : ${runtime.posture}  [UNCHANGED]`;
+      const confNote = prev.runtime.confidence !== runtime.confidence
+        ? `  CONFIDENCE  : ${prev.runtime.confidence} → ${runtime.confidence}  [CHANGED]`
+        : `  CONFIDENCE  : ${runtime.confidence}  [UNCHANGED]`;
+      const evNote = prev.theater.evidencePosture !== theater.evidencePosture
+        ? `  EVIDENCE    : ${prev.theater.evidencePosture} → ${theater.evidencePosture}  [CHANGED]`
+        : `  EVIDENCE    : ${theater.evidencePosture}  [UNCHANGED]`;
+      const prevTs = prev.generatedAt ?? prev.runtime.lastUpdated;
+      deltaLines.push(
+        "",
+        section,
+        `WHAT CHANGED  (compared to snapshot from ${prevTs})`,
+        section,
+        ...(sameTh ? [] : [`  NOTE: Prior snapshot was theater ${prev.theater.short} — cross-theater comparison.`]),
+        postureNote,
+        confNote,
+        evNote,
+        ...(sp?.contradictionRisk
+          ? ["", "  ADVERSARIAL SOURCES ACTIVE — claims require cross-reference before baseline treatment."]
+          : []),
+      );
+    }
     return [
-      "WARSTATE — ESCALATION MEMO",
+      "WARSTATE  //  ESCALATION MEMO",
       divider,
       "",
-      pad("THEATER",        theater.title),
-      pad("CODENAME",       theater.codename),
-      pad("POSTURE",        runtime.posture),
-      pad("CONFIDENCE",     runtime.confidence),
-      pad("EVIDENCE",       theater.evidencePosture),
-      pad("TIMESTAMP",      runtime.lastUpdated),
-      pad("CLASSIFICATION", theater.classification),
+      pad("THEATER",    theater.title),
+      pad("CODENAME",   theater.codename),
+      pad("POSTURE",    runtime.posture),
+      pad("CONFIDENCE", runtime.confidence),
+      pad("EVIDENCE",   theater.evidencePosture),
+      pad("TIMESTAMP",  runtime.lastUpdated),
       "",
       section,
-      "TRIGGER ANALYSIS",
+      "ESCALATION TRIGGERS",
       section,
       ...theater.escalationDrivers.map((d, i) => `  ${i + 1}. ${d}`),
+      ...deltaLines,
       "",
       section,
-      "RISK INDICATORS",
+      "ACTIVE RISK INDICATORS",
       section,
-      ...theater.indicators.slice(0, 3).map((ind, i) => `  ${i + 1}. ${ind}`),
+      ...theater.indicators.slice(0, 4).map((ind, i) => `  ${i + 1}. ${ind}`),
       "",
       section,
       "FORCE POSTURE SUMMARY",
@@ -195,25 +313,16 @@ export function buildReportText(
       "",
       `  ${friendly.label.toUpperCase()}`,
       `    Equipment losses : ${formatNumber(friendly.equipmentLosses)}`,
-      `    Casualties (est) : ${friendly.casualties}`,
-      `    KIA (est)        : ${friendly.killed}`,
+      `    Casualties (est) : ${friendly.casualties}  |  KIA: ${friendly.killed}`,
       "",
       `  ${opposing.label.toUpperCase()}`,
       `    Equipment losses : ${formatNumber(opposing.equipmentLosses)}`,
-      `    Casualties (est) : ${opposing.casualties}`,
-      `    KIA (est)        : ${opposing.killed}`,
+      `    Casualties (est) : ${opposing.casualties}  |  KIA: ${opposing.killed}`,
       "",
       section,
       "IMMEDIATE WATCH ITEMS",
       section,
       ...theater.watchNext.map((w, i) => `  ${i + 1}. ${w}`),
-      "",
-      section,
-      "SOURCE NOTE",
-      section,
-      `  ${theater.sourceDiscipline}`,
-      "",
-      `  ${spSummary}`,
       "",
       section,
       "CONFIDENCE / CLAIM POSTURE",
@@ -223,30 +332,42 @@ export function buildReportText(
         ? ["", "  CONTESTED ITEMS:", ...theater.claimNotes.map((n) => `    — ${n}`)]
         : []),
       "",
+      section,
+      "SOURCE NOTE",
+      section,
+      `  ${theater.sourceDiscipline}`,
+      `  ${spSummary}`,
+      "",
       pad("CLASSIFICATION", theater.classification),
     ].join("\n");
   }
 
-  // ── DAILY THEATER UPDATE ─────────────────────────────────────────────────
+  // ── DAILY THEATER UPDATE — concise cycle update ───────────────────────────
   if (mode === "daily") {
     const deltaLines: string[] = [];
     if (hasDelta) {
+      const prev = previousReport!;
+      const prevTs = prev.generatedAt ?? prev.runtime.lastUpdated;
+      const changes: string[] = [];
+      if (prev.runtime.posture    !== runtime.posture)           changes.push(`POSTURE     : ${prev.runtime.posture} → ${runtime.posture}`);
+      if (prev.runtime.confidence !== runtime.confidence)        changes.push(`CONFIDENCE  : ${prev.runtime.confidence} → ${runtime.confidence}`);
+      if (prev.theater.evidencePosture !== theater.evidencePosture) changes.push(`EVIDENCE    : ${prev.theater.evidencePosture} → ${theater.evidencePosture}`);
+      const unchanged = changes.length === 0;
       deltaLines.push(
         "",
         section,
-        `CHANGE SUMMARY  (since ${previousReport!.runtime.lastUpdated})`,
+        `CYCLE DELTA  (since ${prevTs}${sameTh ? "" : ` / prior theater: ${prev.theater.short}`})`,
         section,
-        `  POSTURE     : ${previousReport!.runtime.posture} → ${runtime.posture}`,
-        `  CONFIDENCE  : ${previousReport!.runtime.confidence} → ${runtime.confidence}`,
-        "  SECTOR SHIFTS: review stress indicators for updated bar values",
+        ...(unchanged ? ["  No material posture changes this cycle."] : changes.map(c => `  ${c}`)),
       );
     }
     return [
-      "WARSTATE — DAILY THEATER UPDATE",
+      "WARSTATE  //  DAILY THEATER UPDATE",
       divider,
       "",
       pad("THEATER",   theater.title),
       pad("POSTURE",   runtime.posture),
+      pad("EVIDENCE",  theater.evidencePosture),
       pad("TIMESTAMP", runtime.lastUpdated),
       "",
       section,
@@ -258,10 +379,10 @@ export function buildReportText(
       section,
       "TODAY'S WATCH PRIORITY",
       section,
-      ...theater.watchNext.map((w, i) => `  ${i + 1}. ${w}`),
+      ...theater.watchNext.slice(0, 3).map((w, i) => `  ${i + 1}. ${w}`),
       "",
       section,
-      "KEY INDICATORS (TOP 3)",
+      "KEY INDICATORS",
       section,
       ...theater.indicators.slice(0, 3).map((ind, i) => `  ${i + 1}. ${ind}`),
       "",
@@ -274,31 +395,41 @@ export function buildReportText(
     ].join("\n");
   }
 
-  // ── ANALYST BRIEF (default) ───────────────────────────────────────────────
+  // ── ANALYST BRIEF — full structured depth ────────────────────────────────
   const deltaSection: string[] = [];
   if (hasDelta) {
+    const prev = previousReport!;
+    const prevTs = prev.generatedAt ?? prev.runtime.lastUpdated;
+    const postureNote = prev.runtime.posture    !== runtime.posture    ? `[CHANGED: ${prev.runtime.posture} → ${runtime.posture}]`    : "[UNCHANGED]";
+    const confNote    = prev.runtime.confidence !== runtime.confidence ? `[CHANGED: ${prev.runtime.confidence} → ${runtime.confidence}]` : "[UNCHANGED]";
+    const evNote      = prev.theater.evidencePosture !== theater.evidencePosture ? `[CHANGED: ${prev.theater.evidencePosture} → ${theater.evidencePosture}]` : "[UNCHANGED]";
+    const spNote      = prev.sourcePosture?.breadth !== sp?.breadth ? `[SHIFTED: ${prev.sourcePosture?.breadth ?? "?"} → ${sp?.breadth ?? "?"}]` : "[UNCHANGED]";
     deltaSection.push(
       "",
       section,
-      "WHAT CHANGED",
+      `WHAT CHANGED  (compared to snapshot: ${prevTs})`,
       section,
-      `  This report is compared against snapshot from ${previousReport!.runtime.lastUpdated}.`,
-      `  POSTURE     : ${previousReport!.runtime.posture} → ${runtime.posture}`,
-      `  CONFIDENCE  : ${previousReport!.runtime.confidence} → ${runtime.confidence}`,
-      "  SECTOR PRESSURE: review stress bars for shifts since prior snapshot",
-      ...(previousReport!.theater.id !== theater.id
-        ? [`  NOTE: Prior snapshot was from a different theater (${previousReport!.theater.short}). Comparison is cross-theater.`]
+      `  Theater     : ${theater.short}${sameTh ? "" : `  [CROSS-THEATER — prior was ${prev.theater.short}]`}`,
+      `  Posture     : ${postureNote}`,
+      `  Confidence  : ${confNote}`,
+      `  Evidence    : ${evNote}`,
+      `  Source Pos. : ${spNote}`,
+      "",
+      `  ANALYST ASSESSMENT: ${sameTh && (prev.runtime.posture !== runtime.posture || prev.runtime.confidence !== runtime.confidence || prev.theater.evidencePosture !== theater.evidencePosture)
+        ? `Material changes detected. Posture and/or confidence assessment has shifted since the prior snapshot dated ${prevTs}. Reassess prior estimates before treatment.`
+        : "No material change in top-level assessments. Prior estimates remain valid for baseline comparison."}`,
+      ...(sp?.contradictionRisk
+        ? ["", "  ADVERSARIAL NOTE: One or more adversarial/disputed sources active. Cross-reference before treating any claim as baseline."]
         : []),
     );
   }
 
   return [
-    "WARSTATE — ANALYST BRIEF",
+    "WARSTATE  //  ANALYST BRIEF",
     divider,
     "",
     pad("PRODUCT",        `WARSTATE / ${theater.codename}`),
     pad("THEATER",        theater.title),
-    pad("DISPLAY NAME",   theater.short),
     pad("REGION",         theater.region),
     pad("CLASSIFICATION", theater.classification),
     pad("POSTURE",        runtime.posture),
@@ -413,70 +544,116 @@ export function buildSourcePosture(theater: Theater): SourcePosture {
   return { breadth, categories: uniqueCats, strength, contradictionRisk, summary };
 }
 
-// Builds the structured JSON payload for the JSON export.
+// Builds the fully structured JSON payload for the JSON export.
 export function buildJsonPayload(snapshot: ReportSnapshot): object {
   const sp = snapshot.sourcePosture;
   const prev = snapshot.previousReport;
+  const delta = prev ? buildDeltaAnalysis(snapshot, prev) : null;
+  const exportedAt = new Date().toISOString();
+
+  const previousSnapshotMeta = prev
+    ? {
+        theaterId:    prev.theater.id,
+        theaterShort: prev.theater.short,
+        theaterTitle: prev.theater.title,
+        reportMode:   prev.mode,
+        reportModeLabel: REPORT_MODE_LABELS[prev.mode],
+        generatedAt:  prev.generatedAt ?? prev.runtime.lastUpdated,
+        posture:      prev.runtime.posture,
+        confidence:   prev.runtime.confidence,
+        evidencePosture: prev.theater.evidencePosture,
+      }
+    : null;
+
   return {
+    // ── Block 1: Meta ──────────────────────────────────────────────────────
     meta: {
       product: "WARSTATE",
+      system: "RSR White Wing / Operational Status System",
+      exportedAt,
       reportMode: snapshot.mode,
       reportModeLabel: REPORT_MODE_LABELS[snapshot.mode],
-      generatedAt: new Date().toISOString(),
-      reportTimestamp: snapshot.runtime.lastUpdated,
-    },
-    theater: {
-      id: snapshot.theater.id,
-      short: snapshot.theater.short,
-      title: snapshot.theater.title,
-      codename: snapshot.theater.codename,
-      region: snapshot.theater.region,
+      dataTimestamp: snapshot.runtime.lastUpdated,
+      snapshotLockedAt: snapshot.generatedAt ?? snapshot.runtime.lastUpdated,
       classification: snapshot.theater.classification,
     },
-    intelligence: {
-      posture: snapshot.runtime.posture,
-      confidence: snapshot.runtime.confidence,
-      evidencePosture: snapshot.theater.evidencePosture,
-      sourcePosture: {
-        breadth: sp.breadth,
-        strength: sp.strength,
-        categories: sp.categories,
-        contradictionRisk: sp.contradictionRisk,
-        summary: sp.summary,
-      },
+
+    // ── Block 2: Theater ──────────────────────────────────────────────────
+    theater: {
+      id:           snapshot.theater.id,
+      short:        snapshot.theater.short,
+      title:        snapshot.theater.title,
+      codename:     snapshot.theater.codename,
+      region:       snapshot.theater.region,
+      classification: snapshot.theater.classification,
       sourceDiscipline: snapshot.theater.sourceDiscipline,
     },
-    assessment: {
-      currentStatus: snapshot.runtime.currentStatus,
-      executiveOverview: snapshot.theater.overview,
-      escalationDrivers: snapshot.theater.escalationDrivers,
-      mainRisks: snapshot.theater.escalationDrivers,
-      watchNext: snapshot.theater.watchNext,
+
+    // ── Block 3: Intelligence ─────────────────────────────────────────────
+    intelligence: {
+      posture:    snapshot.runtime.posture,
+      confidence: snapshot.runtime.confidence,
     },
-    confidence: {
-      posture: snapshot.theater.evidencePosture,
+
+    // ── Block 4: Evidence ─────────────────────────────────────────────────
+    evidence: {
+      grade: snapshot.theater.evidencePosture,
       rationale: snapshot.theater.confidenceRationale,
       claimNotes: snapshot.theater.claimNotes,
     },
+
+    // ── Block 5: Source Posture ───────────────────────────────────────────
+    sourcePosture: {
+      breadth:           sp.breadth,
+      strength:          sp.strength,
+      contradictionRisk: sp.contradictionRisk,
+      categories:        sp.categories,
+      summary:           sp.summary,
+    },
+
+    // ── Block 6: Assessment ───────────────────────────────────────────────
+    assessment: {
+      currentStatus:     snapshot.runtime.currentStatus,
+      executiveOverview: snapshot.theater.overview,
+      escalationDrivers: snapshot.theater.escalationDrivers,
+      watchNext:         snapshot.theater.watchNext,
+    },
+
+    // ── Block 7: Indicators ───────────────────────────────────────────────
     indicators: snapshot.theater.indicators,
-    forceLedger: {
+
+    // ── Block 8: Force Ledger ─────────────────────────────────────────────
+    ledger: {
       friendly: snapshot.theater.friendly,
       opposing: snapshot.theater.opposing,
     },
+
+    // ── Block 9: Sector Stress ────────────────────────────────────────────
     sectorStress: snapshot.runtime.sectors,
+
+    // ── Block 10: Attrition ───────────────────────────────────────────────
     attrition: snapshot.trendBars,
+
+    // ── Block 11: Sources ─────────────────────────────────────────────────
     sources: snapshot.theater.sources,
-    delta: prev
+
+    // ── Block 12: Delta / What Changed ───────────────────────────────────
+    delta: delta
       ? {
-          previousTheaterId:  prev.theater.id,
-          previousTheaterName: prev.theater.short,
-          previousPosture:    prev.runtime.posture,
-          previousConfidence: prev.runtime.confidence,
-          previousTimestamp:  prev.runtime.lastUpdated,
-          postureChanged:     prev.runtime.posture !== snapshot.runtime.posture,
-          confidenceChanged:  prev.runtime.confidence !== snapshot.runtime.confidence,
+          isSameTheater:      delta.isSameTheater,
+          anyChange:          delta.anyChange,
+          analystSummary:     delta.analystSummary,
+          posture:            { changed: delta.postureChanged, prev: delta.posturePrev, curr: delta.postureCurr },
+          confidence:         { changed: delta.confidenceChanged, prev: delta.confidencePrev, curr: delta.confidenceCurr },
+          evidence:           { changed: delta.evidenceChanged, prev: delta.evidencePrev, curr: delta.evidenceCurr },
+          sourcePostureShift: delta.sourcePostureShift,
+          topMovedSector:     delta.topMovedSector,
+          sectorDeltas:       delta.sectorDeltas,
         }
       : null,
+
+    // ── Block 13: Previous Snapshot Meta ──────────────────────────────────
+    previousSnapshotMeta,
   };
 }
 

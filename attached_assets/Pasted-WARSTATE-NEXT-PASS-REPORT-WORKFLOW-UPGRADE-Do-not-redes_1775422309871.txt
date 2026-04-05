@@ -1,0 +1,162 @@
+WARSTATE — NEXT PASS: REPORT WORKFLOW UPGRADE
+
+Do not redesign the UI from scratch.
+Do not break current working exports.
+Do not remove existing evidence posture, source posture, report modes, what changed, or snapshot logic.
+
+OBJECTIVE:
+Upgrade WARSTATE from a strong report generator into a cleaner intelligence production workflow.
+
+Focus only on these next-level improvements:
+
+1. make report modes feel truly different
+2. add report history / snapshot workflow
+3. improve analyst usability
+4. keep deployment stability intact
+
+━━━━━━━━━━━━━━━━━━
+PHASE 1 — TRUE REPORT MODE DIFFERENTIATION
+━━━━━━━━━━━━━━━━━━
+
+Current modes exist, but they now need to feel meaningfully different.
+
+Refine the 4 report modes so each changes:
+- report emphasis
+- section ordering
+- wording style
+- what gets highlighted
+- export structure where appropriate
+
+Modes:
+1. Executive Brief
+2. Analyst Brief
+3. Escalation Memo
+4. Daily Theater Update
+
+Requirements:
+- Executive Brief = short, high-level, leadership-facing
+- Analyst Brief = full structured depth
+- Escalation Memo = escalation drivers, risks, triggers, what changed
+- Daily Theater Update = concise cycle update with status, delta, watch items
+
+Do not just relabel the same report.
+Make each mode actually behave differently.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 2 — REPORT HISTORY / SNAPSHOT WORKFLOW
+━━━━━━━━━━━━━━━━━━
+
+Upgrade snapshot logic into a usable workflow.
+
+Add:
+- previous reports list for current session
+- ability to reopen prior generated reports
+- ability to compare current report against previous report
+- clearer “locked snapshot” handling
+- visible generated timestamp and mode history
+
+Requirements:
+- preserve current snapshot integrity
+- don’t mutate older reports
+- make report history usable without cluttering the page
+- use a clean compact UI approach
+
+━━━━━━━━━━━━━━━━━━
+PHASE 3 — BETTER “WHAT CHANGED” LOGIC
+━━━━━━━━━━━━━━━━━━
+
+Strengthen the delta system.
+
+Instead of only basic prior/current comparison, improve:
+- posture change
+- confidence change
+- evidence posture change
+- sector stress movement
+- source posture movement
+- top indicator shifts
+
+Generate cleaner “what changed” language.
+Make it useful and analyst-grade.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 4 — REPORT QUEUE / WORKFLOW UX
+━━━━━━━━━━━━━━━━━━
+
+Make WARSTATE feel more like an internal report workstation.
+
+Add a compact workflow layer such as:
+- selected report mode visible near Generate Report
+- last generated report info
+- prior snapshot available
+- clearer lock state
+- cleaner “ready to export” state
+
+Do not bloat the UI.
+Do not redesign the entire page.
+Keep it disciplined.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 5 — EXPORT CONSISTENCY
+━━━━━━━━━━━━━━━━━━
+
+Ensure all exports fully reflect:
+- selected report mode
+- locked snapshot
+- prior comparison data
+- source posture
+- evidence posture
+- confidence rationale
+- contested / claim notes
+- watch items
+- what changed
+
+Validate:
+- PDF
+- TXT
+- JSON
+- print
+- copy
+
+━━━━━━━━━━━━━━━━━━
+PHASE 6 — JSON PAYLOAD MATURITY
+━━━━━━━━━━━━━━━━━━
+
+Upgrade JSON export into a real structured reporting payload.
+
+Include clearly separated blocks for:
+- meta
+- theater
+- intelligence
+- sourcePosture
+- evidence
+- assessment
+- delta
+- indicators
+- ledger
+- sectorStress
+- reportMode
+- generatedAt
+- previousSnapshotMeta
+
+Make it suitable for future ingestion into other RSR systems.
+
+━━━━━━━━━━━━━━━━━━
+PHASE 7 — FINAL VALIDATION
+━━━━━━━━━━━━━━━━━━
+
+After implementing:
+- run full build
+- confirm no syntax/runtime errors
+- confirm current WARSTATE features still work
+- confirm report modes are meaningfully different
+- confirm prior snapshot workflow works
+- confirm exports remain stable
+- confirm WARSTATE feels more like an intelligence production tool
+
+RETURN EXACTLY:
+1. Report mode improvements made
+2. Snapshot/history improvements made
+3. Delta/what-changed improvements made
+4. Export/JSON improvements made
+5. Functionality validated
+6. Any remaining limitations

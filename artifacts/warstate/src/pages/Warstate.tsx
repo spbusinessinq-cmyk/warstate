@@ -20,6 +20,7 @@ import { ReportModal } from "@/components/warstate/ReportModal";
 import { ManualCopyModal } from "@/components/warstate/ManualCopyModal";
 
 type PanelId = "overview" | "ledger" | "indicators" | "stress" | "sources";
+type HistoryEntry = ReportSnapshot & { generatedAt: string };
 
 // ─── Color system ─────────────────────────────────────────────────────────────
 // BG_PAGE      #020304   near-black page foundation
@@ -48,6 +49,8 @@ export default function Warstate() {
   const [reportOpen, setReportOpen] = useState(false);
   const [generatedReport, setGeneratedReport] = useState<ReportSnapshot | null>(null);
   const [previousReport, setPreviousReport] = useState<ReportSnapshot | null>(null);
+  const [reportHistory, setReportHistory] = useState<HistoryEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const [reportMode, setReportMode] = useState<ReportMode>("analyst");
   const [refreshCount, setRefreshCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -118,7 +121,8 @@ export default function Warstate() {
   };
 
   const handleGenerateReport = () => {
-    const snapshot: ReportSnapshot = {
+    const generatedAt = new Date().toLocaleString();
+    const snapshot: HistoryEntry = {
       theater,
       runtime,
       comparisonRows,
@@ -126,12 +130,20 @@ export default function Warstate() {
       reportText,
       mode: reportMode,
       sourcePosture,
+      generatedAt,
       previousReport,
     };
     setPreviousReport(generatedReport);
     setGeneratedReport(snapshot);
+    setReportHistory((prev) => [snapshot, ...prev].slice(0, 8));
     setReportOpen(true);
     setToast(`${REPORT_MODE_LABELS[reportMode]} generated and locked`);
+  };
+
+  const handleReopenHistory = (entry: HistoryEntry) => {
+    setGeneratedReport(entry);
+    setReportOpen(true);
+    setShowHistory(false);
   };
 
   const handleExportPDF = async () => {
@@ -348,6 +360,26 @@ export default function Warstate() {
                     </div>
                   </div>
 
+                  {/* Workflow Status Strip */}
+                  <div className="border border-[#121e28] bg-[#050810] px-3 py-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[7px] uppercase tracking-[0.28em] text-[#374650]">Mode</span>
+                      <span className="text-[8px] text-[#5ec998] uppercase tracking-[0.18em]">{REPORT_MODE_LABELS[reportMode]}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[7px] uppercase tracking-[0.28em] text-[#374650]">Lock State</span>
+                      <span className={`text-[8px] uppercase tracking-[0.18em] ${generatedReport ? "text-[#5ec998]" : "text-[#374650]"}`}>
+                        {generatedReport ? "Snapshot Locked" : "Live State"}
+                      </span>
+                    </div>
+                    {generatedReport && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-[7px] uppercase tracking-[0.28em] text-[#374650]">Last Report</span>
+                        <span className="text-[8px] text-[#617888] truncate max-w-[140px]">{generatedReport.theater.short} / {REPORT_MODE_LABELS[generatedReport.mode].split(" ")[0]}</span>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Primary CTA */}
                   <button
                     onClick={handleGenerateReport}
@@ -405,11 +437,45 @@ export default function Warstate() {
                     </button>
                   </div>
 
-                  {/* Report lock status */}
-                  <div className="flex items-center gap-2 text-[9px] leading-5 text-[#374650] border-t border-[#121e28] pt-3">
+                  {/* Report History Toggle */}
+                  {reportHistory.length > 0 && (
+                    <div className="border-t border-[#121e28] pt-3">
+                      <button
+                        onClick={() => setShowHistory((v) => !v)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 border border-[#1e2d38] bg-[#050810] text-[9px] uppercase tracking-[0.2em] text-[#4e6472] hover:border-[#25364a] hover:text-[#7a8e9a] transition-colors"
+                      >
+                        <span>Report History ({reportHistory.length})</span>
+                        <span>{showHistory ? "▲" : "▼"}</span>
+                      </button>
+                      {showHistory && (
+                        <div className="border border-t-0 border-[#1e2d38] bg-[#050810] divide-y divide-[#121e28]">
+                          {reportHistory.map((entry, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleReopenHistory(entry)}
+                              className="w-full text-left px-3 py-2.5 hover:bg-[#080c10] transition-colors group"
+                            >
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="text-[8px] uppercase tracking-[0.18em] text-[#5ec998] group-hover:text-[#7ec9a8]">
+                                  {entry.theater.short}
+                                </span>
+                                <span className="text-[7px] uppercase tracking-[0.14em] text-[#265c42] border border-[#265c42] px-1.5 py-0.5">
+                                  {REPORT_MODE_LABELS[entry.mode].split(" ")[0]}
+                                </span>
+                              </div>
+                              <div className="text-[7px] text-[#374650] tracking-wide">{entry.generatedAt}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Lock status indicator */}
+                  <div className="flex items-center gap-2 text-[9px] leading-5 text-[#374650] border-t border-[#121e28] pt-2">
                     <div className={`w-1.5 h-1.5 shrink-0 ${generatedReport ? "bg-[#265c42]" : "bg-[#1e2d38]"}`} />
                     {generatedReport
-                      ? `Locked: ${generatedReport.theater.short} // ${generatedReport.runtime.lastUpdated}`
+                      ? `Locked: ${generatedReport.theater.short} // ${generatedReport.generatedAt ?? generatedReport.runtime.lastUpdated}`
                       : "No locked report — exports use live state until generated."}
                   </div>
                 </div>
