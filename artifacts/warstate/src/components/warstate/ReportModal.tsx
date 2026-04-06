@@ -14,6 +14,7 @@ interface ReportModalProps {
   onExportTXT: () => void;
   onExportJSON: () => void;
   onCopyBrief: () => void;
+  onPrint: () => void;
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -264,9 +265,9 @@ function SourceStack({ report }: { report: ReportSnapshot }) {
   return (
     <div>
       <div className="flex items-center gap-3 mb-3">
-        <SectionLabel>Source Stack</SectionLabel>
+        <div className="text-[8px] uppercase tracking-[0.36em] text-[#4e6472] shrink-0">Source Stack</div>
         <div className="flex-1 border-t border-[#121e28]" />
-        <div className="text-[8px] uppercase tracking-[0.22em] text-[#374650] mb-3 tabular-nums">{report.theater.sources.length} cat.</div>
+        <div className="text-[8px] uppercase tracking-[0.22em] text-[#374650] tabular-nums shrink-0">{report.theater.sources.length} cat.</div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {report.theater.sources.map((src, idx) => {
@@ -421,12 +422,13 @@ function WhatChanged({ delta }: { delta: DeltaAnalysis }) {
   );
 }
 
-function ExportBar({ exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief }: {
+function ExportBar({ exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief, onPrint }: {
   exportingPdf: boolean;
   onExportPDF: () => void;
   onExportTXT: () => void;
   onExportJSON: () => void;
   onCopyBrief: () => void;
+  onPrint: () => void;
 }) {
   return (
     <div className="flex flex-wrap gap-2 pt-5 border-t border-[#1e2d38]">
@@ -446,6 +448,10 @@ function ExportBar({ exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCop
         className="px-5 py-3 border border-[#1e2d38] bg-[#050810] text-[10px] uppercase tracking-[0.24em] text-[#7a8e9a] hover:border-[#25364a] hover:text-[#c8d6de] transition-colors">
         Copy Brief
       </button>
+      <button onClick={onPrint}
+        className="px-5 py-3 border border-[#1e2d38] bg-[#050810] text-[10px] uppercase tracking-[0.24em] text-[#7a8e9a] hover:border-[#25364a] hover:text-[#c8d6de] transition-colors">
+        Print
+      </button>
     </div>
   );
 }
@@ -453,7 +459,7 @@ function ExportBar({ exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCop
 // ── Mode-specific body renderers ──────────────────────────────────────────────
 
 function ExecutiveBody({ report, delta, ...ex }: { report: ReportSnapshot; delta: DeltaAnalysis | null } & Omit<React.ComponentProps<typeof ExportBar>, "exportingPdf"> & { exportingPdf: boolean }) {
-  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief } = ex;
+  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief, onPrint } = ex;
   const lead2 = report.theater.overview.split(". ").slice(0, 2).join(". ") + ".";
   return (
     <div className="space-y-7">
@@ -497,13 +503,13 @@ function ExecutiveBody({ report, delta, ...ex }: { report: ReportSnapshot; delta
         </div>
         <p className="text-[12px] leading-6 text-[#617888]">{report.theater.confidenceRationale}</p>
       </div>
-      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} />
+      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} onPrint={onPrint} />
     </div>
   );
 }
 
 function AnalystBody({ report, delta, ...ex }: { report: ReportSnapshot; delta: DeltaAnalysis | null } & Omit<React.ComponentProps<typeof ExportBar>, "exportingPdf"> & { exportingPdf: boolean }) {
-  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief } = ex;
+  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief, onPrint } = ex;
   return (
     <div className="space-y-7">
       <MetaStrip report={report} />
@@ -529,13 +535,13 @@ function AnalystBody({ report, delta, ...ex }: { report: ReportSnapshot; delta: 
       <SourcePostureBlock report={report} />
       <SectionDivider />
       <ConfidenceBlock report={report} />
-      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} />
+      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} onPrint={onPrint} />
     </div>
   );
 }
 
 function EscalationBody({ report, delta, ...ex }: { report: ReportSnapshot; delta: DeltaAnalysis | null } & Omit<React.ComponentProps<typeof ExportBar>, "exportingPdf"> & { exportingPdf: boolean }) {
-  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief } = ex;
+  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief, onPrint } = ex;
   return (
     <div className="space-y-7">
       <MetaStrip report={report} />
@@ -554,13 +560,13 @@ function EscalationBody({ report, delta, ...ex }: { report: ReportSnapshot; delt
       <SourcePostureBlock report={report} />
       <SectionDivider />
       <ConfidenceBlock report={report} />
-      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} />
+      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} onPrint={onPrint} />
     </div>
   );
 }
 
 function DailyBody({ report, delta, ...ex }: { report: ReportSnapshot; delta: DeltaAnalysis | null } & Omit<React.ComponentProps<typeof ExportBar>, "exportingPdf"> & { exportingPdf: boolean }) {
-  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief } = ex;
+  const { exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief, onPrint } = ex;
   return (
     <div className="space-y-7">
       {/* Daily: compact 3-cell header */}
@@ -605,7 +611,7 @@ function DailyBody({ report, delta, ...ex }: { report: ReportSnapshot; delta: De
           </div>
         </div>
       </div>
-      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} />
+      <ExportBar exportingPdf={exportingPdf} onExportPDF={onExportPDF} onExportTXT={onExportTXT} onExportJSON={onExportJSON} onCopyBrief={onCopyBrief} onPrint={onPrint} />
     </div>
   );
 }
@@ -620,10 +626,11 @@ export function ReportModal({
   onExportTXT,
   onExportJSON,
   onCopyBrief,
+  onPrint,
 }: ReportModalProps) {
   const delta = report.previousReport ? buildDeltaAnalysis(report, report.previousReport) : null;
 
-  const bodyProps = { report, delta, exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief };
+  const bodyProps = { report, delta, exportingPdf, onExportPDF, onExportTXT, onExportJSON, onCopyBrief, onPrint };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/92 p-3 md:p-6 flex items-start justify-center font-mono overflow-y-auto">

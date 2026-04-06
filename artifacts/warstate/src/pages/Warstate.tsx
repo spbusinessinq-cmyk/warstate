@@ -428,13 +428,14 @@ export default function Warstate() {
                     >
                       Print Report
                     </button>
-                    <button
-                      onClick={() => setSearch("")}
-                      disabled={!search}
-                      className="col-span-2 px-3 py-2.5 border border-[#121e28] bg-[#050810] text-[9px] uppercase tracking-[0.2em] text-[#374650] hover:border-[#1e2d38] hover:text-[#4e6472] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Clear Search
-                    </button>
+                    {generatedReport && (
+                      <button
+                        onClick={() => setReportOpen(true)}
+                        className="col-span-2 px-3 py-3 border border-[#1e3a4e] bg-[#050810] text-[10px] uppercase tracking-[0.2em] text-[#8abbd0] hover:border-[#25364a] hover:text-[#c8d6de] transition-colors"
+                      >
+                        View Locked Report
+                      </button>
+                    )}
                   </div>
 
                   {/* Report History Toggle */}
@@ -553,7 +554,7 @@ export default function Warstate() {
                       <div className="text-[12px] text-[#c8d6de] tabular-nums">{refreshCount}</div>
                     </div>
                     <div className="px-4 py-3 bg-[#050810]">
-                      <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Contra. Risk</div>
+                      <div className="text-[8px] uppercase tracking-[0.28em] text-[#4e6472] mb-1.5">Contradiction</div>
                       <div className={`text-[12px] font-semibold ${sourcePosture.contradictionRisk ? "text-[#c8884e]" : "text-[#5ec998]"}`}>
                         {sourcePosture.contradictionRisk ? "PRESENT" : "NONE FLAGGED"}
                       </div>
@@ -808,6 +809,7 @@ export default function Warstate() {
           onExportTXT={handleExportTXT}
           onExportJSON={handleExportJSON}
           onCopyBrief={handleCopyBrief}
+          onPrint={handlePrint}
         />
       )}
     </div>
